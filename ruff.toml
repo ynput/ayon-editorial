@@ -26,40 +26,23 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "package.py",
+    "package",
 ]
 
 # Same as Black.
 line-length = 79
 indent-width = 4
 
+# Assume Python 3.9
+target-version = "py39"
+
 [lint]
 preview = true  # this is needed for linting empty lines, etc.
-
 pydocstyle.convention = "google"
 
-select = ["ALL"]
-ignore = [
-    "PTH",
-    "ANN101",  # missing-type-function-argument: for older ruff version
-    "ANN204",  # missing-return-type-special-method
-    "COM812",  # missing-trailing-comma
-    "S603",    # subprocess-without-shell-equals-true
-    "ERA001",  # commented-out-code
-    "TRY003",  # raise-vanilla-args
-    "UP006",   # non-pep585-annotation: older python version (type vs. Type)
-    "UP007",   # non-pep604-annotation-union: ..^
-    "UP035",   # deprecated-import: ..
-    "UP045",   # non-pep604-annotation-optional: Use `X | None` for type annotations
-    "ARG002",  # unused-method-argument
-    "INP001",  # implicit-namespace-package: add `__init__.py` to namespaced package
-    "FIX002",  # line-contains-todo: FIX all TODOs
-    "TD003",   # missing-todo-link: missing issue link
-    "S404",    # suspicious-subprocess-import: subprocess module can be insecure
-    "PLC0415", # import-outside-top-level: import must be on top of the file
-    "CPY001",  # missing-copyright-notice: missing copyright header
-
-]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes.
+select = ["E", "F", "W"]
+ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -67,6 +50,9 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.per-file-ignores]
+"tests/*.py" = ["S101", "PLR2004"]  # allow asserts and magical values
 
 [format]
 # Like Black, use double quotes for strings.
@@ -81,16 +67,5 @@ skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
-# Enable auto-formatting of code examples in docstrings. Markdown,
-# reStructuredText code/literal blocks and doctests are all supported.
-#
-# This is currently disabled by default, but it is planned for this
-# to be opt-out in the future.
 docstring-code-format = false
-
-# Set the line length limit used when formatting code snippets in
-# docstrings.
-#
-# This only has an effect when the `docstring-code-format` setting is
-# enabled.
 docstring-code-line-length = "dynamic"
