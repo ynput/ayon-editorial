@@ -47,21 +47,19 @@ BIWhite='\033[1;97m'      # White
 ###############################################################################
 detect_python () {
   echo -e "${BIGreen}>>>${RST} Using python \c"
-  command -v python >/dev/null 2>&1 || { echo -e "${BIRed}- NOT FOUND${RST} ${BIYellow}You need Python 3.9 installed to continue.${RST}"; return 1; }
+  PYTHON="python"
+  command -v python >/dev/null 2>&1 || PYTHON="python3"
+  command -v "$PYTHON" >/dev/null 2>&1 || { echo -e "${BIRed}- NOT FOUND${RST} ${BIYellow}You need Python 3.9 or newer installed to continue.${RST}"; return 1; }
   local version_command="import sys;print('{0}.{1}'.format(sys.version_info[0], sys.version_info[1]))"
-  local python_version="$(python <<< ${version_command})"
+  local python_version="$("$PYTHON" <<< ${version_command})"
   oIFS="$IFS"
   IFS=.
   set -- $python_version
   IFS="$oIFS"
-  if [ "$1" -ge "3" ] && [ "$2" -ge "9" ] ; then
-    if [ "$2" -gt "9" ] ; then
-      echo -e "${BIWhite}[${RST} ${BIRed}$1.$2 ${BIWhite}]${RST} - ${BIRed}FAILED${RST} ${BIYellow}Version is new and unsupported, use${RST} ${BIPurple}3.9.x${RST}"; return 1;
-    else
-      echo -e "${BIWhite}[${RST} ${BIGreen}$1.$2${RST} ${BIWhite}]${RST}"
-    fi
+  if [ "$1" -gt "3" ] || { [ "$1" -eq "3" ] && [ "$2" -ge "9" ]; } ; then
+    echo -e "${BIWhite}[${RST} ${BIGreen}$1.$2${RST} ${BIWhite}]${RST}"
   else
-    command -v python >/dev/null 2>&1 || { echo -e "${BIRed}$1.$2$ - ${BIRed}FAILED${RST} ${BIYellow}Version is old and unsupported${RST}"; return 1; }
+    echo -e "${BIWhite}[${RST} ${BIRed}$1.$2${RST} ${BIWhite}]${RST} - ${BIRed}FAILED${RST} ${BIYellow}Version is old and unsupported, use${RST} ${BIPurple}3.9${RST} ${BIYellow}or newer${RST}"; return 1;
   fi
 }
 
@@ -98,19 +96,16 @@ create_env () {
   pushd "$repo_root" > /dev/null || return > /dev/null
 
 
-  uv venv && uv sync || { echo -e "${BIRed}!!!${RST} Venv installation failed"; return 1; }
-  if [ $? -ne 0 ] ; then
-    echo -e "${BIRed}!!!${RST} Virtual environment creation failed."
-    return 1
-  fi
+  uv venv --allow-existing && uv sync || { echo -e "${BIRed}!!!${RST} Venv installation failed"; return 1; }
 
   echo -e "${BIGreen}>>>${RST} Cleaning cache files ..."
   clean_pyc
+}
 
-  if [ -d "$repo_root/.git" ]; then
-    echo -e "${BIGreen}>>>${RST} Installing pre-commit hooks ..."
-    uv run pre-commit install
-  fi
+clean_pyc () {
+  find "$repo_root" -path "$repo_root/.venv" -prune -o -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
+  find "$repo_root" -path "$repo_root/.venv" -prune -o \( -name "*.pyc" -o -name "*.pyo" \) -type f -delete 2>/dev/null
+  return 0
 }
 
 print_art() {
@@ -141,6 +136,8 @@ default_help() {
   echo -e "  ${BWhite}ruff-check${RST}      ${BCyan}Run Ruff check for the repository${RST}"
   echo -e "  ${BWhite}ruff-fix${RST}        ${BCyan}Run Ruff fix for the repository${RST}"
   echo -e "  ${BWhite}codespell${RST}       ${BCyan}Run codespell check for the repository${RST}"
+  echo -e "  ${BWhite}run${RST}             ${BCyan}Run a command in the venv, e.g. ./manage.sh run python -V${RST}"
+  echo -e "  ${BWhite}run-tests${RST}       ${BCyan}Run pytest through uv, extra arguments are passed on${RST}"
   echo ""
 }
 
@@ -149,7 +146,7 @@ run_ruff () {
   uv run ruff check
 }
 
-run_ruff_check () {
+run_ruff_fix () {
   echo -e "${BIGreen}>>>${RST} Running Ruff fix ..."
   uv run ruff check --fix
 }
@@ -157,6 +154,18 @@ run_ruff_check () {
 run_codespell () {
   echo -e "${BIGreen}>>>${RST} Running codespell check ..."
   uv run codespell
+}
+
+run_command () {
+  shift
+  [ "$#" -gt 0 ] || { echo -e "${BIRed}!!!${RST} Nothing to run."; return 1; }
+  uv run "$@"
+}
+
+run_tests () {
+  shift
+  echo -e "${BIGreen}>>>${RST} Running tests ..."
+  uv run pytest "$@"
 }
 
 main () {
@@ -180,7 +189,7 @@ main () {
       exit $return_code
       ;;
     "rufffix")
-      run_ruff_check || return_code=$?
+      run_ruff_fix || return_code=$?
       exit $return_code
       ;;
     "codespell")
