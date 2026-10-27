@@ -1,0 +1,48 @@
+name: 🗺️ Sync roadmap project
+
+# Gives pull requests the fields of the roadmap step they close, and keeps
+# the roadmap issues in line with `.github/roadmap.yml`.
+# Needs a token with access to the organization project: `ROADMAP_TOKEN`
+# (repository secret) is used when set, else the organization's
+# `YNPUT_BOT_TOKEN`. The default `github.token` cannot edit the project.
+
+on:
+  pull_request:
+    types: [opened, edited, ready_for_review, converted_to_draft, reopened, closed]
+  push:
+    branches: [ develop ]
+    paths:
+      - ".github/roadmap.yml"
+      - "tools/roadmap_sync.py"
+  workflow_dispatch:
+
+concurrency:
+  group: roadmap-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    # Pull requests from forks get no secrets.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ROADMAP_TOKEN || secrets.YNPUT_BOT_TOKEN }}
+    steps:
+      - name: Check the token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::No ROADMAP_TOKEN or YNPUT_BOT_TOKEN secret available"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          # Run the sync tool of the base branch, not of the pull request.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref }}
+      - uses: astral-sh/setup-uv@v6
+      - name: Sync issues and project
+        run: uv run --no-project --with pyyaml tools/roadmap_sync.py
