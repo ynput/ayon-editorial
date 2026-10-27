@@ -17,6 +17,9 @@ The work is planned in the
 [roadmap issue](https://github.com/ynput/ayon-editorial/issues/1) and the
 [Editorial Unification project](https://github.com/orgs/ynput/projects/77).
 
+See [ROADMAP.md](ROADMAP.md), [AGENTS.md](AGENTS.md) and
+[AI-CONTRIBUTION.md](AI-CONTRIBUTION.md) for the plan and how to contribute.
+
 ## Layout
 
 ```
