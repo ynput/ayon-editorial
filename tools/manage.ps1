@@ -26,7 +26,6 @@ PS> .\tools\manage.ps1 ruff-check
 $CurrentDir = Get-Location
 $ScriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 $RepoRoot = (Get-Item $ScriptDir).parent.FullName
-& git submodule update --init --recursive
 $env:PSModulePath = $env:PSModulePath + ";$($openpype_root)\tools\modules\powershell"
 
 $FunctionName=$ARGS[0]
@@ -111,6 +110,21 @@ function Write-AsciiArt() {
     Write-Host $art -ForegroundColor DarkGreen
 }
 
+function Test-Python() {
+    Write-Info -Text ">>> ", "Using python ... " -Color Green, Gray -NoNewLine
+    if (-not (Test-CommandExists "python")) {
+        Write-Info -Text "NOT FOUND, you need Python 3.9 or newer" -Color Yellow
+        Exit-WithCode 1
+    }
+    $version = & python -c "import sys;print('{0}.{1}'.format(*sys.version_info[:2]))"
+    $parts = $version.Split(".")
+    if ([int]$parts[0] -lt 3 -or ([int]$parts[0] -eq 3 -and [int]$parts[1] -lt 9)) {
+        Write-Info -Text "$version - FAILED, Python 3.9 or newer is required" -Color Red
+        Exit-WithCode 1
+    }
+    Write-Info -Text "$version" -Color Green
+}
+
 function Show-PSWarning() {
     if ($PSVersionTable.PSVersion.Major -lt 7) {
         Write-Info -Text "!!! ", "You are using old version of PowerShell - ",  "$($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor)" -Color Red, Yellow, White
@@ -137,7 +151,7 @@ function Restore-Cwd() {
 }
 
 function Create-UvEnv {
-    Change-Cwd
+    Set-Cwd
     Write-Color -Text ">>> ", "Test if UV is installed ... " -Color Green, Gray -NoNewline
     if (Get-Command "uv" -ErrorAction SilentlyContinue)
     {
@@ -152,7 +166,6 @@ function Create-UvEnv {
             Write-Color -Text "INSTALLED" -Color Cyan
         }
     }
-    $python_arg = ""
     $startTime = [int][double]::Parse((Get-Date -UFormat %s))
 
     # note that uv venv can use .python-version marker file to determine what python version to use
@@ -160,10 +173,8 @@ function Create-UvEnv {
     Write-Color -Text ">>> ", "Creating and activating venv ... " -Color Green, Gray
     uv venv --allow-existing .venv
     Write-Color -Text ">>> ", "Compiling dependencies ... " -Color Green, Gray
-    uv pip compile pyproject.toml windows-requirements.in -o requirements.txt
     Write-Color -Text ">>> ", "Installing dependencies ... " -Color Green, Gray
-    uv pip install -r requirements.txt
-    Install-PrecommitHook
+    uv sync
     $endTime = [int][double]::Parse((Get-Date -UFormat %s))
     Restore-Cwd
     try
@@ -196,31 +207,23 @@ function Invoke-Codespell {
 }
 
 function Run-Tests {
-    $RunArgs = @( "run", "pytest", "$($RepoRoot)/tests")
+    $RunArgs = @( "run", "pytest") + $Arguments
 
-    & uv $RunArgs @arguments
+    & uv $RunArgs
 }
 
 function Clean-Cache {
     Write-Info -Text ">>> ", "Cleaning cache files ... " -Color Green, Gray -NoNewline
-    Get-ChildItem $repo_root -Filter "*.pyc" -Force -Recurse | Remove-Item -Force
-    Get-ChildItem $repo_root -Filter "*.pyo" -Force -Recurse | Remove-Item -Force
-    Get-ChildItem $repo_root -Filter "__pycache__" -Force -Recurse | Remove-Item -Force -Recurse
+    Get-ChildItem $RepoRoot -Filter "*.pyc" -Force -Recurse | Remove-Item -Force
+    Get-ChildItem $RepoRoot -Filter "*.pyo" -Force -Recurse | Remove-Item -Force
+    Get-ChildItem $RepoRoot -Filter "__pycache__" -Force -Recurse | Remove-Item -Force -Recurse
     Write-Info -Text "OK" -Color green
 }
 
-function Build-Docs {
-    Clean-Cache
-    $RunArgs = @( "run", "mkdocs", "build")
+function Run-From-Code {
+    $RunArgs = @( "run") + $Arguments
 
-    & uv $RunArgs @arguments
-}
-
-function Serve-Docs {
-    Clean-Cache
-    $RunArgs = @( "run", "mkdocs", "serve")
-
-    & uv $RunArgs @arguments
+    & uv $RunArgs
 }
 
 function Write-Help {
@@ -238,6 +241,8 @@ function Write-Help {
     Write-Info -Text "  ruff-check                    ", "Run Ruff check for the repository" -Color White, Cyan
     Write-Info -Text "  ruff-fix                      ", "Run Ruff fix for the repository" -Color White, Cyan
     Write-Info -Text "  codespell                     ", "Run codespell check for the repository" -Color White, Cyan
+    Write-Info -Text "  run                           ", "Run a command in the venv" -Color White, Cyan
+    Write-Info -Text "  run-tests                     ", "Run pytest through uv" -Color White, Cyan
     Write-Host ""
 }
 
@@ -249,7 +254,7 @@ function Resolve-Function {
     $FunctionName = $FunctionName.ToLower() -replace "\W"
     if ($FunctionName -eq "createenv") {
         Set-Cwd
-        Initialize-Environment
+        Create-UvEnv
     } elseif ($FunctionName -eq "ruffcheck") {
         Set-Cwd
         Invoke-Ruff
@@ -258,7 +263,7 @@ function Resolve-Function {
         Invoke-Ruff -Fix
     } elseif ($FunctionName -eq "codespell") {
         Set-Cwd
-        Invoke-CodeSpell
+        Invoke-Codespell
     } elseif ($FunctionName -eq "run") {
         Set-Cwd
         Run-From-Code
@@ -274,6 +279,7 @@ function Resolve-Function {
 # -----------------------------------------------------
 
 Show-PSWarning
+Test-Python
 Write-AsciiArt
 
 Resolve-Function

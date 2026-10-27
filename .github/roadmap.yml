@@ -1,0 +1,771 @@
+# Editorial unification roadmap.
+#
+# Source of truth for the roadmap issues in ynput/ayon-editorial and their
+# fields in the "Editorial Unification (ayon-editorial)" GitHub Project.
+# `tools/roadmap_sync.py` creates or updates one issue per entry, keyed by
+# its `id`, sets the issue type, labels, sub-issues, "blocked by" links and
+# the Project fields. Edit this file, then run the sync; do not edit the
+# generated issue bodies by hand.
+#
+# Placeholders: `{P2.1}` in any text renders as a link to that step's issue.
+
+project:
+  owner: ynput
+  number: 77
+repository: ynput/ayon-editorial
+
+# Rendered into every step issue.
+supported_hosts: >-
+  Oldest supported host versions: Hiero/Nuke Studio 14, Flame 2024,
+  DaVinci Resolve 18. Shared code targets Python 3.9 and
+  OpenTimelineIO 0.15 or newer (P2.1 confirms the floor in each host).
+
+frozen_contracts:
+  - creator `identifier`s of every editorial creator
+  - product base types `editorial`, `shot`, `plate`, `audio`, `editorial_pkg`
+  - plugin `order`, `families` and `hosts` of every moved or adopted plugin
+  - "`instance.data` keys read by ayon-core: `otioClip`, `context.otioTimeline`, `handleStart`, `handleEnd`, `frameStart`, `workfileFrameStart`, `shotDurationFromSource`, `otioReviewClips`"
+  - family tags `otio.clip.ranges`, `otio.resources`, `otio.review.track`, `otio.timeline.workfile`, `otio.trim.video`
+  - timeline marker name `AYONData` and its `json_metadata`
+  - the `<host>_sub_products` keys and every host settings path
+
+root:
+  id: ROADMAP
+  title: Editorial unification roadmap
+  kind: Epic
+  repo: ayon-editorial
+  tier: main
+  priority: High
+  status: In progress
+  goal: >-
+    Move the editorial code that Flame, Hiero, Resolve and Traypublisher
+    each carry a copy of into one DCC-agnostic addon, `ayon-editorial`.
+    Host addons keep only what talks to their host API; every addon that
+    uses the shared code declares `editorial` in `ayon_required_addons`.
+  scope:
+    - "OTIO helpers: timecode and frames, sequence-path padding, the `AYONData` marker codec, retime effects"
+    - "Building the OTIO timeline from host clips (today `flame_export.py`, `hiero_export.py`, `davinci_export.py`)"
+    - "Shot naming, hierarchy and vertical sync (`PublishClip` in each host, `ShotMetadataSolver` in Traypublisher)"
+    - "The clip creator framework, shared shot/plate/audio collector logic and the editorial package"
+    - "One OpenTimelineIO install hook for hosts with their own Python (Flame, Resolve)"
+    - Creator feature parity between hosts once the code is shared
+  notes: |
+    ### Delivery
+    - One step = one issue = one branch = one PR, stacked with `gh stack`
+      (one stack per phase in this repo, one per host repo).
+    - PR titles: `[Editorial P2.3]: …`. PR bodies: `Close ynput/ayon-editorial#<n>`.
+    - Each library phase is released as `0.N.0` before the host PRs that
+      adopt it are merged; host PRs add `"editorial": ">=0.N.0"` to
+      `ayon_required_addons` and get the `bump minor` label.
+    - Host adoption steps are tracked here and get their own issue and PR
+      in the host repository when implementation starts; both link back here.
+
+    ### Earlier discussions this roadmap resolves
+    These asked for the same editorial behaviour in every host. Each one
+    is referenced again from the step that handles it.
+    - ynput/ayon-hiero#65, ynput/ayon-resolve#56: clip name tokenizer in every editorial creator (only Traypublisher has it)
+    - ynput/ayon-hiero#15, ynput/ayon-resolve#39: deeper shot folder hierarchy in the clip creators
+    - ynput/ayon-flame#68, ynput/ayon-hiero#83, ynput/ayon-resolve#70, ynput/ayon-traypublisher#100: instance parenting "in all editorial DCC integrations" (root: ynput/ayon-core#874)
+    - ynput/ayon-flame#176, ynput/ayon-flame#178: handle clamping "consistent across hosts" (after ynput/ayon-resolve#132)
+    - ynput/ayon-resolve#40: workfile version-up "for editorial experience consistency across all hosts"
+    - ynput/ayon-flame#109, ynput/ayon-flame#28, ynput/ayon-hiero#29: retime consolidation across Flame and Hiero
+    - ynput/ayon-hiero#69, ynput/ayon-hiero#162: vertical sync behaviour
+    - ynput/ayon-resolve#2, ynput/ayon-resolve#82, ynput/ayon-traypublisher#7, ynput/ayon-core#1400: OpenTimelineIO version differences between hosts
+
+phases:
+  - id: P0
+    phase: P0 Bootstrap
+    title: Bootstrap the ayon-editorial addon
+    status: In progress
+    goal: >-
+      A packaged, tested, empty addon with agent instructions, so every
+      later step only adds code. Released together with P1 as 0.1.0.
+    release: 0.1.0
+    steps:
+      - id: P0.1
+        title: Repository, labels and Project
+        kind: Infra
+        tier: main
+        priority: High
+        status: In progress
+        goal: Create the repository and the roadmap Project.
+        scope:
+          - Repository from `ynput/ayon-addon-template`, default branch `develop`
+          - Labels copied from ayon-core, plus `host:` labels, `roadmap` and `to consider`
+          - Project fields (Phase, Kind, Target repo, Tier, Priority, Validation, Step, Release, Depends on, dates) and views
+          - Clone the repository into the development workspace
+        acceptance:
+          - "[x] Repository created"
+          - "[x] Labels copied"
+          - "[x] Project created and linked, fields added"
+          - "[x] Roadmap issues created from `.github/roadmap.yml`"
+          - "[x] Project views created"
+          - "[ ] Group the \"Roadmap by phase\" view by Phase (web UI only; the API cannot set grouping)"
+          - "[ ] Repository visibility switched to public (needs a person)"
+
+      - id: P0.2
+        title: Roadmap manifest and sync tool
+        kind: Infra
+        tier: main
+        priority: Medium
+        status: In review
+        depends: [P0.3]
+        goal: >-
+          Commit `.github/roadmap.yml` and `tools/roadmap_sync.py` so the
+          roadmap issues and Project fields are generated, and smaller models
+          only edit YAML.
+        scope:
+          - "`tools/roadmap_sync.py`: create or update issues by step ID, set issue type, labels, sub-issues, blocked-by links and Project fields; `--dry-run`"
+          - Excluded from the addon package by `create_package.py`
+          - "`tests/test_roadmap_manifest.py`: unique IDs, known field values, dependencies exist without cycles, every body renders"
+        acceptance:
+          - "[ ] A second run with no manifest change makes no changes"
+          - "[ ] `--dry-run` prints the planned changes"
+
+      - id: P0.3
+        title: Addon skeleton and create_package.py
+        kind: Infra
+        tier: standard
+        priority: High
+        status: In review
+        goal: The addon skeleton, packaged correctly.
+        scope:
+          - "`package.py`: `name = \"editorial\"`, `title = \"Editorial\"`, `client_dir = \"ayon_editorial\"`, `ayon_server_version = \">=1.1.2\"`, `ayon_required_addons = {\"core\": \">=1.8.0\"}`, `ayon_compatible_addons = {\"applications\": \">=1.0.0\"}`; no `app_host_name` (not a host)"
+          - "`client/ayon_editorial/{__init__,addon,version}.py`: `EditorialAddon(AYONAddon)` with only light imports, safe at launch time"
+          - "`server/__init__.py` and `server/settings/{__init__,main,conversion}.py`: empty `EditorialSettings`, a no-op conversion chain (host addon layout)"
+          - "`create_package.py`: writes `version.py`, puts `client/pyproject.toml` into `private/`, excludes `tests/`, `tools/`, `.github/`"
+          - README and LICENSE
+        acceptance:
+          - "[ ] `python create_package.py --skip-zip` builds the expected layout"
+          - "[ ] The addon loads on a local AYON server with an empty settings page"
+
+      - id: P0.4
+        title: Development environment, basic tests and CI
+        kind: Infra
+        tier: standard
+        priority: High
+        status: In review
+        depends: [P0.3]
+        goal: Tests and linting from the first PR, with the module layer rules enforced.
+        scope:
+          - "uv `pyproject.toml`, `ruff.toml` aligned with ayon-core (E/F/W, py39, preview, Google docstrings)"
+          - "`tests/test_package.py`: package metadata fields"
+          - "`tests/test_create_package.py`: `--skip-zip` into a temporary folder; checks `version.py` and the layout"
+          - "`tests/test_dcc_agnostic.py`: AST check that no module imports a host API (`hiero`, `flame`, `DaVinciResolveScript`, `unreal`, `nuke`), Qt at import time, or an `ayon_<host>` package, and that layer 0 (`otio/`, `shots/`, `editorial_package.py`) imports only the standard library, `opentimelineio` and `clique`"
+          - "`tools/manage.sh` / `tools/manage.ps1`; `pr_unittests.yml` matrix: Python 3.9 with OTIO 0.15, 0.16, 0.17 and Python 3.11 with the latest OTIO"
+          - Point the template's `assign_pr_to_project.yml` at this Project
+        acceptance:
+          - "[ ] ruff and pytest pass locally and in CI on the whole matrix"
+        refs:
+          - "ynput/ayon-pipeline-tests#1: editorial integration tests through Hiero"
+
+      - id: P0.5
+        title: Agent instructions and roadmap docs
+        kind: Docs
+        tier: main
+        priority: High
+        status: In review
+        depends: [P0.3]
+        goal: Instructions good enough for smaller models to run the remaining steps.
+        scope:
+          - "Root `AGENTS.md`: overview, layout, layer rules, commands, OTIO and Python limits, the frozen contracts table, links to the roadmap"
+          - "`client/ayon_editorial/AGENTS.md`: module map and import rules"
+          - "`tests/AGENTS.md`: fixtures, markers, characterization tests"
+          - "`ROADMAP.md`: vision, in and out of scope, the duplication map, target architecture, phases linked to their epics, editorial version to host minimum table, OTIO support matrix per host, future ideas"
+          - "`AI-CONTRIBUTION.md`: workflow (claim the issue, survey first, branch in the stack, implement, verify, PR, hand over for host validation), recipes for library port / host adoption / parity feature / docs, subagent briefing template, tiers and when to escalate, what agents never do"
+          - Issue and PR templates
+        acceptance:
+          - "[ ] Every roadmap step can be started from its issue plus these files alone"
+
+  - id: P1
+    phase: P1 OTIO in DCCs
+    title: One OpenTimelineIO install hook for every host
+    goal: >-
+      The smallest useful slice: it proves the whole flow (library step,
+      release, host adoption) and fixes Resolve having no OTIO install.
+    release: 0.1.0
+    steps:
+      - id: P1.1
+        title: Shared OpenTimelineIO install pre-launch hook
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P0.4]
+        goal: A base pre-launch hook that installs a pinned OpenTimelineIO into a host's own Python.
+        scope:
+          - "`client/ayon_editorial/lib/otio_install.py` with `OTIOInstallPreLaunchHookBase` (not in a scanned hooks folder; hosts subclass it)"
+          - Site-packages path per interpreter, safe `PYTHONPATH` prepend, import check, pinned `pip install` with an optional index URL
+          - Tests with a mocked subprocess
+        acceptance:
+          - "[ ] Works when `PYTHONPATH` is unset"
+          - "[ ] Skips the install when the pinned version is already importable"
+        refs:
+          - "ynput/ayon-flame#126: earlier fix of the Flame hook"
+          - "ynput/ayon-core#1400: safe importing of opentimelineio"
+
+      - id: P1.2
+        title: Flame uses the shared OTIO install hook
+        kind: Adoption
+        repo: ayon-flame
+        tier: light
+        priority: High
+        depends: [P1.1]
+        goal: "`client/ayon_flame/hooks/pre_opentimelineio_install.py` subclasses the shared hook."
+        scope:
+          - Same behaviour as today, with a pinned version instead of the latest
+          - "Fixes `env[\"PYTHONPATH\"] +=` raising `KeyError` when `PYTHONPATH` is unset (the error is swallowed today)"
+          - Declare `editorial` in `ayon_required_addons`
+        acceptance:
+          - "[ ] Flame launches with and without `PYTHONPATH` set and `import opentimelineio` works"
+
+      - id: P1.3
+        title: Resolve installs OpenTimelineIO before launch
+        kind: Adoption
+        repo: ayon-resolve
+        tier: standard
+        priority: High
+        depends: [P1.1]
+        goal: Resolve gets OTIO the same way Flame does.
+        scope:
+          - "New `InstallOpenTimelineIOToResolve` hook running after `PreLaunchResolveSetup`, using the `RESOLVE_PYTHON3_HOME` interpreter"
+          - "Additive setting `hooks.InstallOpenTimelineIOToResolve.enabled` (no conversion needed)"
+          - "Remove the TODO in `client/ayon_resolve/hooks/pre_resolve_setup.py`; the import in `client/ayon_resolve/api/lib.py` no longer fails on a clean machine"
+          - Declare `editorial` in `ayon_required_addons`
+        acceptance:
+          - "[ ] Resolve 18, 19 and 20 launch on a machine without OTIO and publish a shot"
+        refs:
+          - "ynput/ayon-resolve#2: publishing failed with OTIO 0.16.0+"
+          - "ynput/ayon-resolve#82: OTIO version comparison error"
+
+  - id: P2
+    phase: P2 OTIO library
+    title: Shared OTIO library and host adoption
+    goal: >-
+      One implementation of the OTIO helpers and the timeline builder;
+      host exporters keep only their host reads.
+    release: 0.2.0
+    steps:
+      - id: P2.1
+        title: "OTIO compatibility layer (`otio/compat.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P1.1]
+        goal: One place for OTIO version differences.
+        scope:
+          - "Import guard, version check, `find_clips()` / `each_clip()` shims (today copied in Hiero and Resolve)"
+          - Record the OTIO version bundled with Hiero 14/15/16 and found in Flame 2024–2026 and Resolve 18–20; set the supported floor from it
+        acceptance:
+          - "[ ] Tests pass on the whole CI matrix"
+          - "[ ] OTIO support matrix per host recorded in `ROADMAP.md`"
+        refs:
+          - "ynput/ayon-traypublisher#7: deprecated `each_child` methods"
+          - "ynput/ayon-core#1424, ynput/ayon-core#1466: OTIO update to 0.17.0 and its revert"
+
+      - id: P2.2
+        title: "Time helpers (`otio/time.py`)"
+        kind: Library
+        tier: light
+        priority: High
+        depends: [P2.1]
+        goal: Rational time and ranges, timecode to frames to seconds.
+        scope:
+          - "Merge the copies in `client/ayon_flame/otio/utils.py`, `client/ayon_hiero/api/otio/utils.py`, `client/ayon_resolve/otio/utils.py`"
+        acceptance:
+          - "[ ] Characterization tests: one case per host variant"
+
+      - id: P2.3
+        title: "Sequence path helpers (`otio/paths.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P2.1]
+        goal: One sequence-path normaliser for `%0Nd`, `[1001-1100]` and `####` padding.
+        scope:
+          - Tests for every notation each host handles today
+        acceptance:
+          - "[ ] Every host variant round-trips"
+
+      - id: P2.4
+        title: "AYON marker codec (`otio/markers.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P2.1]
+        goal: Read and write the `AYONData` marker and find a clip by its marker.
+        scope:
+          - "`json_metadata` codec and clip-index lookup (today in each host's `utils.py` and `client/ayon_resolve/api/lib.py`)"
+          - "Resolve's marker unwrap stays in Resolve: it handles a Resolve-specific quirk"
+        acceptance:
+          - "[ ] Markers written by every host today decode unchanged"
+        refs:
+          - "ynput/ayon-resolve#92: marker unwrap robustness"
+
+      - id: P2.5
+        title: "Retime effects (`otio/effects.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P2.2]
+        goal: Speed, freeze frame and timewarp to OTIO effects, with exactly the keys ayon-core reads.
+        scope:
+          - "Round-trip tests against ayon-core's retime fixtures (`tests/client/ayon_core/pipeline/editorial/resources/*.json`)"
+          - "Flame's timewarp XML parsing (`client/ayon_flame/otio/tw_bake.py`) stays in Flame"
+          - Needs a deep-tier review
+        acceptance:
+          - "[ ] Every ayon-core retime fixture round-trips"
+        refs:
+          - "ynput/ayon-flame#109: retiming notes"
+          - "ynput/ayon-flame#28, ynput/ayon-hiero#29: retime consolidation"
+          - "ynput/ayon-nuke#61: retime consumer in Nuke"
+
+      - id: P2.6
+        title: "Timeline builder (`otio/builder.py`) and OTIO compare tool"
+        kind: Library
+        tier: deep
+        priority: High
+        depends: [P2.3, P2.4, P2.5]
+        goal: "`TimelineBuilder` with `ClipSpec` / `MediaSpec` dataclasses: time ranges, gaps, tracks, metadata, markers, effects, `write_to_file`."
+        scope:
+          - "Replaces the shared skeleton of `flame_export.py` (763 lines), `hiero_export.py` (437) and `davinci_export.py` (343)"
+          - "Works on plain data, never host objects, so Unreal, review tools and farm jobs can reuse it"
+          - "`tools/otio_compare.py`: normalised diff of two OTIO exports, used for every host adoption"
+          - Design by the deep tier, implementation by the standard tier
+        acceptance:
+          - "[ ] Builds timelines equal (by `otio_compare`) to fixture exports from each host"
+
+      - id: P2.7
+        title: Hiero exports its timeline with the shared builder
+        kind: Adoption
+        repo: ayon-hiero
+        tier: standard
+        priority: High
+        depends: [P2.6]
+        goal: "`client/ayon_hiero/api/otio/hiero_export.py` keeps only the Hiero reads."
+        scope:
+          - "`client/ayon_hiero/api/otio/utils.py` becomes a re-export shim"
+          - Declare `editorial` in `ayon_required_addons`
+        acceptance:
+          - "[ ] `otio_compare` before/after shows no difference on a test timeline with retimes and timewarps"
+
+      - id: P2.8
+        title: Resolve exports its timeline with the shared builder
+        kind: Adoption
+        repo: ayon-resolve
+        tier: standard
+        priority: High
+        depends: [P2.6]
+        goal: "`client/ayon_resolve/otio/davinci_export.py` keeps only the Resolve reads."
+        scope:
+          - "`client/ayon_resolve/otio/utils.py` becomes a re-export shim; the Resolve marker unwrap stays"
+          - Declare `editorial` in `ayon_required_addons`
+        acceptance:
+          - "[ ] `otio_compare` before/after shows no difference"
+
+      - id: P2.9
+        title: Flame exports its timeline with the shared builder
+        kind: Adoption
+        repo: ayon-flame
+        tier: standard
+        priority: High
+        depends: [P2.6]
+        goal: "`client/ayon_flame/otio/flame_export.py` keeps only the Flame reads."
+        scope:
+          - "`client/ayon_flame/otio/utils.py` becomes a re-export shim; `tw_bake.py` stays"
+        acceptance:
+          - "[ ] `otio_compare` before/after shows no difference on a timeline with timewarps"
+
+      - id: P2.10
+        title: Traypublisher uses the shared OTIO helpers
+        kind: Adoption
+        repo: ayon-traypublisher
+        tier: light
+        priority: Medium
+        depends: [P2.1, P2.4]
+        goal: Traypublisher's editorial collectors use the compat and marker helpers.
+        scope:
+          - Declare `editorial` in `ayon_required_addons`
+        acceptance:
+          - "[ ] Simple and Advanced Editorial publish an EDL and an OTIO file unchanged"
+
+  - id: P3
+    phase: P3 Shots and creators
+    title: Shared shot naming and clip creator framework
+    goal: >-
+      One shot hierarchy solver and one clip-creator workflow; hosts provide
+      a small adapter for their timeline.
+    release: 0.3.0
+    steps:
+      - id: P3.1
+        title: "Shot hierarchy solver (`shots/hierarchy.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P2.6]
+        goal: "`ShotHierarchySolver`: templates, `#` padding, count from and steps, rename, parents, `folderPath`, clip-name tokens, tasks."
+        scope:
+          - "Start from Hiero's `PublishClip` (`client/ayon_hiero/api/plugin.py`, the most complete); cover the Flame and Resolve differences and Traypublisher's `ShotMetadataSolver` (`client/ayon_traypublisher/api/editorial.py`)"
+          - Any folder depth below `shots/`
+          - "Clip-name tokens shared by every host, so a tokenizer UI could later be added once instead of per host (not in scope; see the review in ynput/ayon-hiero#91)"
+          - Needs a deep-tier review
+        acceptance:
+          - "[ ] Characterization tests reproduce each host's current names for the same inputs"
+        refs:
+          - "ynput/ayon-hiero#15, ynput/ayon-resolve#39: deeper shot folder hierarchy"
+          - "ynput/ayon-hiero#65, ynput/ayon-resolve#56: clip name tokenizer in every editorial creator"
+          - "ynput/ayon-hiero#4: vertical rename"
+
+      - id: P3.2
+        title: "Vertical sync (`shots/vertical_sync.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P3.1]
+        goal: Hero-track matching and product-name de-duplication.
+        acceptance:
+          - "[ ] Characterization tests for each host's current behaviour"
+        refs:
+          - "ynput/ayon-hiero#162, ynput/ayon-hiero#163: product name collisions in vertical sync"
+          - "ynput/ayon-hiero#69: frame range from another track"
+          - "ynput/ayon-resolve#50: vertical align fix"
+
+      - id: P3.3
+        title: "Creator attribute definitions (`create/attr_defs.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P3.1]
+        goal: Attribute-definition factories with a feature flag per host.
+        scope:
+          - "Fix Flame's FPS option: value `23.997`, label `23.976` (`client/ayon_flame/plugins/create/create_shot_clip.py`)"
+        acceptance:
+          - "[ ] Each host's current attribute list is reproduced by its flags"
+
+      - id: P3.4
+        title: "Clip creator adapter and mixins (`create/adapter.py`, `create/mixins.py`)"
+        kind: Library
+        tier: deep
+        priority: High
+        depends: [P3.2, P3.3]
+        goal: >-
+          `TimelineAdapter` ABC (host implements: items, item info, metadata
+          I/O) plus the clip-creator workflow and the hidden shot, plate and
+          audio sub-creator mixins.
+        scope:
+          - "Hosts keep `HieroCreator`, `FlameCreator`, … and add the mixins; identifiers and settings stay"
+          - Instance parenting (shot as parent of its plate, audio and review instances) handled once in the mixins
+          - Tested with a fake adapter
+        acceptance:
+          - "[ ] A fake adapter creates the same instances as each host does today"
+        refs:
+          - "ynput/ayon-flame#68, ynput/ayon-hiero#83, ynput/ayon-resolve#70, ynput/ayon-traypublisher#100: instance parenting in all editorial integrations"
+          - "ynput/ayon-core#874: publisher editorial grouping view"
+
+      - id: P3.5
+        title: Hiero clip creator uses the shared solver and mixins
+        kind: Adoption
+        repo: ayon-hiero
+        tier: standard
+        priority: High
+        depends: [P3.4]
+        goal: "`client/ayon_hiero/plugins/create/create_shot_clip.py` and `PublishClip` keep only Hiero calls."
+        acceptance:
+          - "[ ] Same instances and names as before on a test timeline"
+
+      - id: P3.6
+        title: Resolve clip creator uses the shared solver and mixins
+        kind: Adoption
+        repo: ayon-resolve
+        tier: standard
+        priority: High
+        depends: [P3.4]
+        goal: "`client/ayon_resolve/plugins/create/create_shot_clip.py` and `PublishClip` keep only Resolve calls."
+        acceptance:
+          - "[ ] Same instances and names as before on a test timeline"
+
+      - id: P3.7
+        title: Flame clip creator uses the shared solver and mixins
+        kind: Adoption
+        repo: ayon-flame
+        tier: standard
+        priority: High
+        depends: [P3.4]
+        goal: "`client/ayon_flame/plugins/create/create_shot_clip.py` and `PublishClip` keep only Flame calls."
+        acceptance:
+          - "[ ] Same instances and names as before on a test timeline"
+
+      - id: P3.8
+        title: Traypublisher shot metadata uses the shared solver
+        kind: Adoption
+        repo: ayon-traypublisher
+        tier: standard
+        priority: Medium
+        depends: [P3.1]
+        goal: "`ShotMetadataSolver` delegates to `ShotHierarchySolver`."
+        acceptance:
+          - "[ ] Simple and Advanced Editorial produce the same shots as before"
+
+  - id: P4
+    phase: P4 Publish helpers
+    title: Shared shot, plate and audio collector logic
+    goal: Host collectors keep only their host calls.
+    release: 0.4.0
+    steps:
+      - id: P4.1
+        title: "Publish helpers (`publish/lib.py`)"
+        kind: Library
+        tier: standard
+        priority: High
+        depends: [P2.6]
+        goal: "`editorialSharedData`, clamping handles to available media, review options, OTIO clip lookup."
+        scope:
+          - "Handle clamping changes instance values only and logs each reduction, as Resolve and Hiero do"
+        acceptance:
+          - "[ ] Characterization tests from each host's `collect_shots.py`, `collect_plates.py` and `collect_audio.py`"
+        refs:
+          - "ynput/ayon-flame#176, ynput/ayon-flame#178, ynput/ayon-resolve#132: consistent handle clamping"
+
+      - id: P4.2
+        title: Hiero collectors use the shared publish helpers
+        kind: Adoption
+        repo: ayon-hiero
+        tier: standard
+        priority: Medium
+        depends: [P4.1]
+        goal: Plugin orders and families unchanged.
+        acceptance:
+          - "[ ] Publish of a test timeline produces the same versions and representations"
+
+      - id: P4.3
+        title: Resolve collectors use the shared publish helpers
+        kind: Adoption
+        repo: ayon-resolve
+        tier: standard
+        priority: Medium
+        depends: [P4.1]
+        goal: Plugin orders and families unchanged.
+        acceptance:
+          - "[ ] Publish of a test timeline produces the same versions and representations"
+
+      - id: P4.4
+        title: Flame collectors use the shared publish helpers
+        kind: Adoption
+        repo: ayon-flame
+        tier: standard
+        priority: Medium
+        depends: [P4.1]
+        goal: Plugin orders and families unchanged.
+        acceptance:
+          - "[ ] Publish of a test timeline produces the same versions and representations"
+
+      - id: P4.5
+        title: Traypublisher collectors use the shared publish helpers
+        kind: Adoption
+        repo: ayon-traypublisher
+        tier: standard
+        priority: Medium
+        depends: [P4.1]
+        goal: "`collect_shot_instances.py` and the editorial collectors call the helpers."
+        acceptance:
+          - "[ ] Simple and Advanced Editorial publish the same output as before"
+
+  - id: P5
+    phase: P5 Editorial package
+    title: Shared editorial package logic
+    goal: One implementation of the editorial package publish.
+    release: 0.5.0
+    steps:
+      - id: P5.1
+        title: "Editorial package helpers (`editorial_package.py`)"
+        kind: Library
+        tier: standard
+        priority: Medium
+        depends: [P2.6]
+        goal: Publish-path prediction, media remapping in the OTIO, rootless paths, target-URL replace and validation.
+        acceptance:
+          - "[ ] Characterization tests from each host's `extract_editorial_package.py`"
+        refs:
+          - "ynput/ayon-hiero#173: editorial package with server reviewables"
+          - "ynput/ayon-resolve#68: loaded package shows offline media"
+
+      - id: P5.2
+        title: Hiero editorial package uses the shared helpers
+        kind: Adoption
+        repo: ayon-hiero
+        tier: standard
+        priority: Medium
+        depends: [P5.1]
+        goal: "`client/ayon_hiero/plugins/publish/extract_editorial_package.py` keeps only the Hiero calls."
+        acceptance:
+          - "[ ] Package publishes and loads back in Hiero and Resolve"
+
+      - id: P5.3
+        title: Resolve editorial package uses the shared helpers
+        kind: Adoption
+        repo: ayon-resolve
+        tier: standard
+        priority: Medium
+        depends: [P5.1]
+        goal: "`client/ayon_resolve/plugins/publish/extract_editorial_package.py` keeps only the Resolve calls."
+        acceptance:
+          - "[ ] Package publishes and loads back in Resolve and Hiero"
+
+      - id: P5.4
+        title: Traypublisher editorial package uses the shared helpers
+        kind: Adoption
+        repo: ayon-traypublisher
+        tier: standard
+        priority: Medium
+        depends: [P5.1]
+        goal: "`client/ayon_traypublisher/plugins/publish/extract_editorial_pckg.py` keeps only the Traypublisher calls."
+        acceptance:
+          - "[ ] Package publishes and loads in Hiero and Resolve"
+
+  - id: P6
+    phase: P6 Creator parity
+    title: Creator feature parity between hosts
+    goal: >-
+      With the creator framework shared, give every host the features only
+      one host has today. Each issue starts with a short research note on
+      what the host API allows.
+    release: 0.6.0
+    steps:
+      - id: P6.1
+        title: Include handles, retimed handles and retimed frame range in Hiero and Resolve
+        kind: Parity
+        repos: [ayon-hiero, ayon-resolve]
+        tier: standard
+        priority: Medium
+        depends: [P3.5, P3.6]
+        goal: "Flame-only options `includeHandles`, `retimedHandles`, `retimedFramerange`."
+        refs:
+          - "ynput/ayon-flame#28: why retimed handles exist"
+
+      - id: P6.2
+        title: Review track regex pattern in Flame and Resolve
+        kind: Parity
+        repos: [ayon-flame, ayon-resolve]
+        tier: standard
+        priority: Medium
+        depends: [P3.6, P3.7]
+        goal: "Hiero-only option `reviewTrackRegexPattern`."
+
+      - id: P6.3
+        title: Shot task assignment in Hiero and Resolve
+        kind: Parity
+        repos: [ayon-hiero, ayon-resolve]
+        tier: standard
+        priority: Medium
+        depends: [P3.5, P3.6]
+        goal: "Flame-only task assignment (`add_tasks`)."
+        refs:
+          - "ynput/ayon-traypublisher#198: available tasks as a creator attribute"
+
+      - id: P6.4
+        title: Use shot name and segment index in Hiero and Resolve
+        kind: Parity
+        repos: [ayon-hiero, ayon-resolve]
+        tier: standard
+        priority: Low
+        depends: [P3.5, P3.6]
+        goal: "Flame-only options `useShotName` and `segmentIndex`."
+
+      - id: P6.5
+        title: Resolve clip selection without clip colour
+        kind: Parity
+        repos: [ayon-resolve]
+        tier: standard
+        priority: Low
+        depends: [P3.6]
+        goal: >-
+          Resolve marks "selected" clips with the Chocolate clip colour because
+          its scripting API exposes no clip selection. Use a real selection if a
+          supported Resolve version allows it; otherwise document the limit.
+        refs:
+          - "ynput/ayon-resolve#123: setting to turn off the Chocolate filter"
+
+      - id: P6.6
+        title: Shared parsing of attributes from clip comments
+        kind: Parity
+        repos: [ayon-flame, ayon-hiero, ayon-resolve]
+        tier: standard
+        priority: Low
+        depends: [P3.4]
+        goal: One parser for creator attributes written in clip comments, used by every host.
+
+      - id: P6.7
+        title: Publish Hiero soft effects from Flame and Resolve, where possible
+        kind: Parity
+        repos: [ayon-flame, ayon-resolve]
+        tier: standard
+        priority: Low
+        depends: [P3.6, P3.7]
+        goal: >-
+          Hiero-only `publish_effects`. Research first whether Flame and Resolve
+          expose comparable effects; close as not possible otherwise.
+
+  - id: P7
+    phase: P7 Release and future
+    title: Release and later work
+    goal: First stable release, then the moves and ideas kept on the roadmap.
+    release: 1.0.0
+    steps:
+      - id: P7.1
+        title: Release workflow and 1.0.0
+        kind: Infra
+        tier: human
+        priority: High
+        depends: [P0.4]
+        goal: Release `ayon-editorial` like other ynput addons.
+        scope:
+          - "`release_trigger` and `upload_to_ynput_cloud` workflows"
+          - Documentation
+          - Add an editorial note to each host repo's `AGENTS.md`
+        acceptance:
+          - "[ ] Released on ynput cloud and installable in a bundle with Flame, Hiero, Resolve and Traypublisher"
+
+      - id: P7.2
+        title: Move ayon-core's OTIO publish plugins into ayon-editorial
+        kind: Decision
+        repo: ayon-core
+        tier: deep
+        priority: Low
+        depends: [P5.1]
+        goal: >-
+          Planned at low priority. ayon-core keeps its OTIO publish plugins
+          and `pipeline/editorial.py` until this step. Decide how to move them
+          without breaking hosts that do not depend on `editorial` yet.
+        scope:
+          - "Inventory: the collect/extract OTIO plugins in `client/ayon_core/plugins/publish/` and `client/ayon_core/pipeline/editorial.py`"
+          - Deprecation path and the core version that drops them
+
+      - id: P7.3
+        title: Timeline publishing from Unreal with the shared builder
+        kind: Research
+        repo: ayon-unreal
+        tier: deep
+        priority: Low
+        depends: [P2.6]
+        goal: "Unreal has no OTIO code today, only LevelSequences. Research publishing a LevelSequence as an OTIO timeline with `otio/builder.py`."
+
+      - id: P7.4
+        title: Editorial rendering on the farm with ayon-deadline
+        kind: Research
+        repo: ayon-deadline
+        tier: deep
+        priority: Very low
+        depends: [P2.6]
+        goal: >-
+          To consider, not planned. Design only: run editorial extraction
+          headless on a farm. Layer 0 already works on files and OTIO objects,
+          not host objects, so a farm job can call it.
+
+      - id: P7.5
+        title: Review tools adopting the shared timeline builder
+        kind: Research
+        tier: deep
+        priority: Very low
+        depends: [P2.6]
+        goal: >-
+          To consider, not planned. AYON review tools that build OTIO
+          timelines could use `otio/builder.py` instead of their own code.

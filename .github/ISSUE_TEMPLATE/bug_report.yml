@@ -1,0 +1,53 @@
+name: Bug report
+description: Something in ayon-editorial does not work as expected.
+title: "[Bug]: "
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: input
+    id: addon_version
+    attributes:
+      label: Editorial addon version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host
+      options:
+        - Hiero / Nuke Studio
+        - Flame
+        - DaVinci Resolve
+        - Traypublisher
+        - None (library only)
+    validations:
+      required: true
+  - type: input
+    id: host_version
+    attributes:
+      label: Host application version
+      placeholder: Resolve 18.6
+  - type: input
+    id: otio_version
+    attributes:
+      label: OpenTimelineIO version
+      placeholder: "0.15.0"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or traceback
+      render: shell
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...

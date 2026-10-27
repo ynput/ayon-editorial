@@ -1,0 +1,52 @@
+name: 🧐 Run Unit Tests
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }}, OTIO ${{ matrix.otio }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.9"
+            otio: "0.15.*"
+          - python: "3.9"
+            otio: "0.16.*"
+          - python: "3.9"
+            otio: "0.17.*"
+          - python: "3.11"
+            otio: "latest"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install requirements
+        run: ./tools/manage.sh create-env
+      - name: Override OpenTimelineIO version
+        run: |
+          if [ "${{ matrix.otio }}" = "latest" ]; then
+            uv pip install --upgrade opentimelineio
+          else
+            uv pip install "opentimelineio==${{ matrix.otio }}"
+          fi
+          uv pip list | grep -i opentimelineio
+      - name: Run tests
+        run: uv run --no-sync pytest

@@ -3,24 +3,43 @@
 # the specific addon bundle set up on the AYON server. This file should
 # be used only for local development and CI/CD purposes. To define addon
 # dependencies, use pyproject.toml file in the `client` directory.
-
+#
+# Tests never import `ayon_core`: they read files and use AST.
 
 [project]
-name = "ayon-addon-template"
+name = "ayon-editorial"
 version = "0.1.0"
-description = "Add your description here"
+description = "Shared editorial code for AYON editorial host addons"
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.9.6"
+requires-python = ">=3.9"
 dependencies = []
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
-    "codespell",
     "ruff ~= 0.11.4",
-    "flake8",
-    "mypy", 
-    "isort", 
-    "pre-commit"
+    "codespell >=2.2.6",
+    "opentimelineio >=0.15",
+    "clique >=2.0.0",
+    "pyyaml >=6.0",
+]
+
+[tool.codespell]
+# Ignore words that are not in the dictionary.
+ignore-words-list = "ayon,ynput"
+
+# Ignore lines that contain this regex. This is hack for missing inline ignore.
+ignore-regex = ".*codespell:ignore.*"
+
+skip = "./.*,./package/*,./uv.lock"
+count = true
+quiet-level = 3
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+markers = [
+    "otio: test needs OpenTimelineIO installed",
+    "slow: test takes noticeably long",
 ]
