@@ -410,9 +410,7 @@ def sync_issues(repo, entries, manifest) -> dict[str, dict]:
         body = render_body(entry, entries, manifest, numbers)
         current_labels = {label["name"] for label in issue["labels"]}
         missing_labels = [
-            label
-            for label in labels_for(entry)
-            if label not in current_labels
+            label for label in labels_for(entry) if label not in current_labels
         ]
         update = {}
         if issue["title"] != entry["title_full"]:
@@ -521,7 +519,7 @@ def project_state(owner: str, number: int) -> tuple[str, dict, dict]:
         page = graphql(
             """query($p:ID!,$c:String){node(id:$p){... on ProjectV2{
             items(first:100,after:$c){pageInfo{hasNextPage endCursor} nodes{id
-            content{... on Issue{id}}
+            content{... on Issue{id} ... on PullRequest{id}}
             fieldValues(first:30){nodes{
               ... on ProjectV2ItemFieldTextValue{
                 text field{... on ProjectV2FieldCommon{name}}}
@@ -570,6 +568,102 @@ def field_values(entry: dict) -> dict[str, str]:
     return values
 
 
+def ensure_item(project_id, items, node_id, label):
+    """Return the Project item of an issue or PR, adding it if missing."""
+    item = items.get(node_id)
+    if item:
+        return item
+    added = write(
+        f"project add {label}",
+        graphql,
+        "mutation($p:ID!,$c:ID!){addProjectV2ItemById(input:"
+        "{projectId:$p,contentId:$c}){item{id}}}",
+        p=project_id,
+        c=node_id,
+    )
+    if not added:
+        return None
+    item = {
+        "id": added["addProjectV2ItemById"]["item"]["id"],
+        "values": {},
+    }
+    items[node_id] = item
+    return item
+
+
+def set_fields(project_id, fields, item, values, label):
+    for name, value in values.items():
+        if item["values"].get(name) == value:
+            continue
+        field = fields[name]
+        if field["dataType"] == "SINGLE_SELECT":
+            option = next(
+                o["id"] for o in field["options"] if o["name"] == value
+            )
+            payload = {"singleSelectOptionId": option}
+        else:
+            payload = {"text": value}
+        write(
+            f"field {label} {name}={value}",
+            graphql,
+            "mutation($p:ID!,$i:ID!,$f:ID!,$v:ProjectV2FieldValue!)"
+            "{updateProjectV2ItemFieldValue(input:{projectId:$p,itemId:$i,"
+            "fieldId:$f,value:$v}){projectV2Item{id}}}",
+            p=project_id,
+            i=item["id"],
+            f=field["id"],
+            v=payload,
+        )
+
+
+def pull_request_status(pr: dict) -> str | None:
+    """Project status of a PR, None for one closed without merging."""
+    if pr["state"] == "MERGED":
+        return "Done"
+    if pr["state"] == "CLOSED":
+        return None
+    return "In progress" if pr["isDraft"] else "In review"
+
+
+def sync_pull_requests(repo, entries, issues, project_id, fields, items):
+    """Add PRs to the Project with the fields of the issue they close.
+
+    A PR belongs to the step whose issue its body closes
+    (`Close <issue url>`). The automation that adds new PRs to the Project
+    does not set any field.
+    """
+    by_number = {
+        issue["number"]: entry
+        for entry in entries
+        if (issue := issues.get(entry["id"]))
+    }
+    prs = gh(
+        "pr", "list", "-R", repo, "--state", "all", "--limit", "500",
+        "--json", "number,id,body,state,isDraft",
+    )  # fmt: skip
+    for pr in prs:
+        closes = re.findall(
+            rf"(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+"
+            rf"(?:https://github.com/{re.escape(repo)}/issues/|"
+            rf"{re.escape(repo)}#|#)(\d+)",
+            pr["body"] or "",
+            flags=re.IGNORECASE,
+        )
+        entry = next((by_number[int(n)] for n in closes
+                      if int(n) in by_number), None)  # fmt: skip
+        status = pull_request_status(pr)
+        if not entry or not status:
+            continue
+        label = f"PR #{pr['number']}"
+        item = ensure_item(project_id, items, pr["id"], label)
+        if not item:
+            continue
+        values = field_values(entry)
+        values.pop("Depends on", None)
+        values["Status"] = status
+        set_fields(project_id, fields, item, values, label)
+
+
 def sync_project(manifest, entries, issues):
     owner, number = manifest["project"]["owner"], manifest["project"]["number"]
     project_id, fields, items = project_state(owner, number)
@@ -577,44 +671,13 @@ def sync_project(manifest, entries, issues):
         issue = issues.get(entry["id"])
         if not issue:
             continue
-        item = items.get(issue["id"])
-        if not item:
-            added = write(
-                f"project add #{issue['number']}",
-                graphql,
-                "mutation($p:ID!,$c:ID!){addProjectV2ItemById(input:"
-                "{projectId:$p,contentId:$c}){item{id}}}",
-                p=project_id,
-                c=issue["id"],
-            )
-            if not added:
-                continue
-            item = {
-                "id": added["addProjectV2ItemById"]["item"]["id"],
-                "values": {},
-            }
-        for name, value in field_values(entry).items():
-            if item["values"].get(name) == value:
-                continue
-            field = fields[name]
-            if field["dataType"] == "SINGLE_SELECT":
-                option = next(
-                    o["id"] for o in field["options"] if o["name"] == value
-                )
-                payload = {"singleSelectOptionId": option}
-            else:
-                payload = {"text": value}
-            write(
-                f"field #{issue['number']} {name}={value}",
-                graphql,
-                "mutation($p:ID!,$i:ID!,$f:ID!,$v:ProjectV2FieldValue!)"
-                "{updateProjectV2ItemFieldValue(input:{projectId:$p,itemId:$i,"
-                "fieldId:$f,value:$v}){projectV2Item{id}}}",
-                p=project_id,
-                i=item["id"],
-                f=field["id"],
-                v=payload,
-            )
+        label = f"#{issue['number']}"
+        item = ensure_item(project_id, items, issue["id"], label)
+        if item:
+            set_fields(project_id, fields, item, field_values(entry), label)
+    sync_pull_requests(
+        manifest["repository"], entries, issues, project_id, fields, items
+    )
 
 
 def main():
