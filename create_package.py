@@ -76,7 +76,9 @@ IGNORE_FILE_PATTERNS: list[Pattern] = [
         # NOTE this could be an issue in some cases
         r"^\.",
         # Skip '.pyc' files
-        r"\.pyc$"
+        r"\.pyc$",
+        # Skip agent instructions, they are for development only
+        r"^AGENTS\.md$",
     )
 ]
 
