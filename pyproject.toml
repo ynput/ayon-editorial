@@ -22,6 +22,7 @@ dev = [
     "codespell >=2.2.6",
     "opentimelineio >=0.15",
     "clique >=2.0.0",
+    "pyyaml >=6.0",
 ]
 
 [tool.codespell]
