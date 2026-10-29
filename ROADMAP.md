@@ -97,6 +97,10 @@ Each library phase is released before the host PRs that adopt it are
 merged. Host PRs add `"editorial": ">=0.N.0"` to `ayon_required_addons`
 and get the `bump minor` label.
 
+Host PRs target the host's `develop-minor` branch (created from its
+`develop`), not `develop`, so roadmap work stays apart from regular
+development. See "Branching in host repos" in [AGENTS.md](AGENTS.md).
+
 ## Editorial versions and host minimums
 
 Host application minimums are the support floor: Hiero 14, Flame 2024,
