@@ -27,12 +27,18 @@ Existing:
 | Module | Status |
 | --- | --- |
 | `__init__.py`, `addon.py`, `version.py` | exists (P0.3) |
+| `lib/otio_install.py` | done (P1.1) |
+
+`lib/otio_install.py` holds `OTIOInstallHookMixin`, a plain mixin and not a
+`PreLaunchHook` subclass: `ayon_applications` runs every `PreLaunchHook`
+subclass in a hook module, imported ones too, so a shared base with empty
+`app_groups` would run on every launch. A host hook is
+`class X(OTIOInstallHookMixin, PreLaunchHook)` and imports only the mixin.
 
 Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `lib/otio_install.py` | 1 | P1.1 | planned |
 | `otio/compat.py` | 0 | P2.1 | planned |
 | `otio/time.py` | 0 | P2.2 | planned |
 | `otio/paths.py` | 0 | P2.3 | planned |

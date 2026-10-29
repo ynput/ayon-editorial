@@ -180,6 +180,7 @@ phases:
   - id: P1
     phase: P1 OTIO in DCCs
     title: One OpenTimelineIO install hook for every host
+    status: In progress
     goal: >-
       The smallest useful slice: it proves the whole flow (library step,
       release, host adoption) and fixes Resolve having no OTIO install.
@@ -190,10 +191,11 @@ phases:
         kind: Library
         tier: standard
         priority: High
+        status: In review
         depends: [P0.4]
-        goal: A base pre-launch hook that installs a pinned OpenTimelineIO into a host's own Python.
+        goal: A mixin that gives a host pre-launch hook the install of a pinned OpenTimelineIO into the host's own Python.
         scope:
-          - "`client/ayon_editorial/lib/otio_install.py` with `OTIOInstallPreLaunchHookBase` (not in a scanned hooks folder; hosts subclass it)"
+          - "`client/ayon_editorial/lib/otio_install.py` with `OTIOInstallHookMixin`: a mixin, not a `PreLaunchHook` subclass, because launch hook discovery collects every `PreLaunchHook` subclass in a module, imported ones included, and a base with empty `app_groups` would run for every application. Hosts declare `class X(OTIOInstallHookMixin, PreLaunchHook)`"
           - Site-packages path per interpreter, safe `PYTHONPATH` prepend, import check, pinned `pip install` with an optional index URL
           - Tests with a mocked subprocess
         acceptance:
@@ -209,6 +211,7 @@ phases:
         repo: ayon-flame
         tier: light
         priority: High
+        status: In review
         depends: [P1.1]
         goal: "`client/ayon_flame/hooks/pre_opentimelineio_install.py` subclasses the shared hook."
         scope:
@@ -224,6 +227,7 @@ phases:
         repo: ayon-resolve
         tier: standard
         priority: High
+        status: In review
         depends: [P1.1]
         goal: Resolve gets OTIO the same way Flame does.
         scope:
