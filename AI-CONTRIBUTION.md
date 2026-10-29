@@ -50,7 +50,9 @@ Move code from the host copies into a shared module.
 Replace a host copy with the shared code. Needs the library phase released
 as `0.N.0`.
 
-1. Branch `enhancement/<issue>-editorial-<slug>` in the host repo.
+1. Branch `enhancement/<issue>-editorial-<slug>` in the host repo, from
+   `develop-minor` (create it from `develop` if missing). The PR targets
+   `develop-minor`, never `develop`.
 2. Add `"editorial": ">=0.N.0"` to `ayon_required_addons`.
 3. Replace the copy with an import; keep a re-export shim where the
    issue says so. Keep plugin `order`, `families`, `hosts`, creator

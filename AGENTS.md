@@ -84,8 +84,27 @@ or deprecation path, and a note in the PR.
 Renaming a settings key needs a conversion function in
 `server/settings/conversion.py`.
 
+## Branching in host repos
+
+All host-side work of this roadmap (every "Host adoption" step and every
+host PR that requires `editorial`) targets the branch `develop-minor` of
+the host repository, never `develop`. `develop-minor` is created from the
+host's current `develop`, so roadmap work does not mix with regular
+development, which keeps releasing patches from `develop`.
+
+- Open host PRs against `develop-minor` and keep it up to date by merging
+  `develop` into it.
+- `develop-minor` is merged into `develop` only when the host minor
+  release that requires `editorial` is made; that is a human decision.
+- Create `develop-minor` from `develop` in a host repository when its
+  first adoption step starts (done for ayon-flame and ayon-resolve).
+- This repository (`ayon-editorial`) has no `develop-minor`: its `develop`
+  only carries roadmap work.
+
 ## Rules for agents
 
+- Never target `develop` of a host repository with roadmap work, see
+  Branching in host repos.
 - Never merge, release, or change repository visibility.
 - Never claim to have run a host application; write manual steps for a
   human instead.
