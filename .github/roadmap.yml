@@ -244,6 +244,7 @@ phases:
   - id: P2
     phase: P2 OTIO library
     title: Shared OTIO library and host adoption
+    status: In progress
     goal: >-
       One implementation of the OTIO helpers and the timeline builder;
       host exporters keep only their host reads.
@@ -254,6 +255,7 @@ phases:
         kind: Library
         tier: standard
         priority: High
+        status: In review
         depends: [P1.1]
         goal: One place for OTIO version differences.
         scope:
@@ -271,6 +273,7 @@ phases:
         kind: Library
         tier: light
         priority: High
+        status: In review
         depends: [P2.1]
         goal: Rational time and ranges, timecode to frames to seconds.
         scope:
@@ -283,6 +286,7 @@ phases:
         kind: Library
         tier: standard
         priority: High
+        status: In review
         depends: [P2.1]
         goal: One sequence-path normaliser for `%0Nd`, `[1001-1100]` and `####` padding.
         scope:
@@ -295,6 +299,7 @@ phases:
         kind: Library
         tier: standard
         priority: High
+        status: In review
         depends: [P2.1]
         goal: Read and write the `AYONData` marker and find a clip by its marker.
         scope:
@@ -310,6 +315,7 @@ phases:
         kind: Library
         tier: standard
         priority: High
+        status: In review
         depends: [P2.2]
         goal: Speed, freeze frame and timewarp to OTIO effects, with exactly the keys ayon-core reads.
         scope:
