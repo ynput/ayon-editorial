@@ -13,9 +13,10 @@ difference.
 from __future__ import annotations
 
 import argparse
-import fnmatch
+import functools
 import json
 import math
+import re
 import sys
 from dataclasses import asdict, dataclass
 from typing import Any, List, Optional, Sequence, Tuple
@@ -62,7 +63,8 @@ class CompareOptions:
         tolerance: Absolute tolerance on RationalTime values and floats.
         rate_tolerance: Relative tolerance on rates, so 23.976 against
             23.976024 is a difference.
-        ignore: `fnmatch` patterns on the path, e.g.
+        ignore: glob patterns on the path (`*` and `?` only; `[` is a plain
+            character, paths contain it), e.g.
             `*.metadata.Date Modified`.
         loose_numbers: When True `1 == 1.0`; otherwise int against float
             is a `type` difference.
@@ -74,6 +76,22 @@ class CompareOptions:
     ignore: Tuple[str, ...] = ()
     loose_numbers: bool = False
     max_differences: int = 0
+
+
+@functools.lru_cache(maxsize=None)
+def _glob_regex(pattern: str) -> "re.Pattern":
+    """Compile a glob where only `*` and `?` are wildcards.
+
+    `fnmatch` reads `[` as a character class, but every list index in a
+    difference path is written `children[0:Clip "a"]`.
+    """
+    return re.compile(
+        "".join(
+            ".*" if char == "*" else "." if char == "?" else re.escape(char)
+            for char in pattern
+        ),
+        re.DOTALL,
+    )
 
 
 class _Full(Exception):
@@ -123,7 +141,7 @@ class _Walker:
 
     def ignored(self, path: str) -> bool:
         return any(
-            fnmatch.fnmatchcase(path, pattern)
+            _glob_regex(pattern).fullmatch(path)
             for pattern in self.options.ignore
         )
 

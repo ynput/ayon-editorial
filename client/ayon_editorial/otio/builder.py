@@ -442,7 +442,14 @@ class TimelineBuilder:
         rate: Timeline rate.
         start_frame: Global start time in frames at `rate`.
         metadata: Timeline metadata.
-        gap_mode: `GAP_RECORD`, `GAP_TRACK_END` or `GAP_NONE`.
+        gap_mode: `GAP_RECORD`, `GAP_TRACK_END` or `GAP_NONE`. The two
+            gap modes keep what the hosts do today, quirks included:
+            `GAP_RECORD` writes a gap of zero or negative length when a
+            clip starts at or before the previous out (Flame and Hiero
+            do), and skips the `- 1` after a previous out of 0.
+            `GAP_TRACK_END` counts the track length in the units of its
+            clips, so it is only right while every clip is at the
+            timeline rate (Resolve).
         sequence_fallback_padded: See `create_media_reference`.
     """
 

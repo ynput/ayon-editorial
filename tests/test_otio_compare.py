@@ -196,3 +196,30 @@ def test_main_unreadable_file_exit_2(tmp_path):
 
 def test_main_usage_error_exit_2():
     assert compare.main(["only-one"]) == 2
+
+
+def test_compare_timelines_ignore_pattern_with_literal_brackets():
+    """List indexes in a path contain `[`: it must not act as a class."""
+    options = compare.CompareOptions(
+        ignore=('*children[0:Clip "a"].metadata.x',)
+    )
+
+    def make(value):
+        timeline = _timeline()
+        clip = otio.schema.Clip(name="a", metadata={"x": value})
+        track = otio.schema.Track(name="V1")
+        track.append(clip)
+        timeline.tracks.append(track)
+        return timeline
+
+    assert compare.compare_timelines(make(1), make(2)) != []
+    assert compare.compare_timelines(make(1), make(2), options) == []
+
+
+def test_compare_timelines_ignore_question_mark_matches_one_char():
+    options = compare.CompareOptions(ignore=("*.metadata.k?",))
+    diffs = compare.compare_timelines(
+        _timeline(metadata={"k1": "a"}), _timeline(metadata={"k1": "b"}),
+        options,
+    )
+    assert diffs == []
