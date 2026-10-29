@@ -24,6 +24,7 @@ __all__ = (
     "find_children",
     "find_clips",
     "get_otio_version",
+    "has_image_sequence_reference",
     "is_otio_supported",
     "parse_version",
     "require_otio",
@@ -112,6 +113,11 @@ def is_otio_supported(minimum: Tuple[int, ...] = MIN_OTIO_VERSION) -> bool:
     except OTIOVersionError:
         return False
     return True
+
+
+def has_image_sequence_reference() -> bool:
+    """Tell whether OTIO has `ImageSequenceReference` (0.13 and newer)."""
+    return hasattr(require_otio().schema, "ImageSequenceReference")
 
 
 def find_children(
