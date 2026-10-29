@@ -1,0 +1,566 @@
+{
+  "name": "synthetic_hiero_tl",
+  "framerate": [
+    24,
+    1
+  ],
+  "timecode_start": 86400,
+  "metadata": {
+    "tl.meta": "synthetic"
+  },
+  "format": {
+    "width": 1920,
+    "height": 1080,
+    "pixel_aspect": 1.0
+  },
+  "project": {
+    "useOCIOEnvironmentOverride": false,
+    "lutSetting16Bit": "linear",
+    "lutSetting8Bit": "sRGB",
+    "lutSettingFloat": "linear",
+    "lutSettingLog": "Cineon",
+    "lutSettingViewer": "sRGB",
+    "lutSettingWorkingSpace": "linear",
+    "lutUseOCIOForExport": true,
+    "ocioConfigName": "synthetic",
+    "ocioConfigPath": "/tmp/synthetic/config.ocio"
+  },
+  "clips": {
+    "c010": {
+      "framerate": [
+        24000,
+        1001
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c010"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh010.mov",
+        "start_frame": 0,
+        "timecode_start": 86400,
+        "single_file": true,
+        "duration": 240,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0,
+        "metadata": {
+          "media.meta": "a"
+        }
+      }
+    },
+    "c020": {
+      "framerate": [
+        25,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c020"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/plates/sh020_plate.%04d.exr",
+        "start_frame": 1001,
+        "timecode_start": 1001,
+        "single_file": false,
+        "padding": 4,
+        "head": "sh020_plate.",
+        "duration": 100,
+        "width": 2048,
+        "height": 858,
+        "pixel_aspect": 1.0
+      },
+      "tags": [
+        {
+          "name": "AYONData",
+          "icon": "icons:TagGreen.png",
+          "in_time": 3,
+          "metadata": {
+            "tag.length": "0",
+            "tag.label": "AYONData",
+            "tag.json_metadata": "{\"id\": \"ayon.create.instance\", \"productType\": \"plate\", \"folderPath\": \"/shots/sh020\", \"variant\": \"main\"}"
+          }
+        }
+      ]
+    },
+    "c030": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c030"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh030.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 100,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "c040": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c040"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh040.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 100,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "c050": {
+      "framerate": [
+        24000,
+        1001
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c050"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh050.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 120,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "c060": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c060"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh060.mov",
+        "start_frame": 0,
+        "timecode_start": 1000,
+        "single_file": true,
+        "duration": 100,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "c070": {
+      "framerate": [
+        25,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "c070"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/sh070.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 100,
+        "width": 1280,
+        "height": 720,
+        "pixel_aspect": 1.0
+      }
+    },
+    "p010": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "p010"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/plate_a.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 10,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "p020": {
+      "framerate": [
+        24000,
+        1001
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "p020"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/plate_b.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 50,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    },
+    "a010": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "a010"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/audio/aud010.wav",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 100,
+        "width": 0,
+        "height": 0,
+        "has_audio": true
+      }
+    },
+    "x010": {
+      "framerate": [
+        24,
+        1
+      ],
+      "colour_transform": "ACES - ACEScg",
+      "metadata": {
+        "foo.clip": "x010"
+      },
+      "media": {
+        "filename": "/tmp/synthetic/mov/x010.mov",
+        "start_frame": 0,
+        "timecode_start": 0,
+        "single_file": true,
+        "duration": 100,
+        "width": 1920,
+        "height": 1080,
+        "pixel_aspect": 1.0
+      }
+    }
+  },
+  "tracks": [
+    {
+      "name": "Video 1",
+      "kind": "video",
+      "items": [
+        {
+          "name": "sh010",
+          "clip": "c010",
+          "timeline_in": 10,
+          "timeline_out": 33,
+          "source_in": 5,
+          "source_out": 28,
+          "speed": 1.0,
+          "tags": [
+            {
+              "name": "AYONData",
+              "icon": "icons:TagMagenta.png",
+              "in_time": 0,
+              "metadata": {
+                "tag.length": "24",
+                "tag.label": "AYONData",
+                "tag.json_metadata": "{\"id\": \"ayon.create.instance\", \"productType\": \"plate\", \"folderPath\": \"/shots/sh010\", \"variant\": \"main\"}"
+              }
+            },
+            {
+              "name": "Copy",
+              "icon": "icons:TagBlue.png"
+            },
+            {
+              "name": "Note",
+              "icon": "icons:TagRed.png",
+              "visible": false
+            }
+          ]
+        },
+        {
+          "name": "sh020",
+          "clip": "c020",
+          "timeline_in": 34,
+          "timeline_out": 57,
+          "source_in": 12,
+          "source_out": 35,
+          "speed": 1.0
+        },
+        {
+          "name": "sh030",
+          "clip": "c030",
+          "timeline_in": 70,
+          "timeline_out": 93,
+          "source_in": 20,
+          "source_out": 31,
+          "speed": 0.5
+        },
+        {
+          "name": "sh040",
+          "clip": "c040",
+          "timeline_in": 90,
+          "timeline_out": 113,
+          "source_in": 40,
+          "source_out": 63,
+          "speed": -1.0
+        },
+        {
+          "name": "sh050",
+          "clip": "c050",
+          "timeline_in": 114,
+          "timeline_out": 137,
+          "source_in": 10,
+          "source_out": 10,
+          "speed": 0.0
+        },
+        {
+          "name": "sh060",
+          "clip": "c060",
+          "timeline_in": 138,
+          "timeline_out": 161,
+          "source_in": 4,
+          "source_out": 27,
+          "speed": 1.0
+        },
+        {
+          "name": "sh070",
+          "clip": "c070",
+          "timeline_in": 170,
+          "timeline_out": 193,
+          "source_in": 8,
+          "source_out": 31,
+          "speed": 1.0
+        }
+      ],
+      "effects": [
+        [
+          {
+            "name": "TimeWarp1",
+            "node": {
+              "name": {
+                "value": "tw_anim"
+              },
+              "lookup": {
+                "value": 0,
+                "curve": [
+                  [
+                    138,
+                    138
+                  ],
+                  [
+                    161,
+                    150
+                  ]
+                ]
+              },
+              "length": {
+                "value": 0,
+                "curve": [
+                  [
+                    138,
+                    4
+                  ],
+                  [
+                    161,
+                    10
+                  ]
+                ]
+              }
+            },
+            "linked": [
+              "sh060"
+            ]
+          },
+          {
+            "name": "TimeWarp_2",
+            "node": {
+              "name": {
+                "value": "tw_const"
+              },
+              "lookup": {
+                "value": 2.5
+              },
+              "length": {
+                "value": 5
+              }
+            },
+            "linked": [
+              "sh070"
+            ]
+          }
+        ],
+        [
+          {
+            "name": "TimeWarp3",
+            "node": {
+              "name": {
+                "value": "tw_off"
+              },
+              "lookup": {
+                "value": 1
+              },
+              "length": {
+                "value": 1
+              }
+            },
+            "linked": [
+              "sh060"
+            ],
+            "enabled": false
+          },
+          {
+            "name": "Transform1",
+            "node": {
+              "name": {
+                "value": "xf"
+              },
+              "lookup": {
+                "value": 0
+              },
+              "length": {
+                "value": 0
+              }
+            },
+            "linked": []
+          },
+          {
+            "name": "TimeWarp4",
+            "node": {
+              "name": {
+                "value": "tw_free"
+              },
+              "lookup": {
+                "value": 3
+              },
+              "length": {
+                "value": 1
+              }
+            },
+            "linked": [
+              "sh030"
+            ]
+          }
+        ]
+      ],
+      "tags": [
+        {
+          "name": "AYONData",
+          "icon": "icons:TagYellow.png",
+          "in_time": 12,
+          "metadata": {
+            "tag.length": "6",
+            "tag.label": "AYONData",
+            "tag.json_metadata": "{\"id\": \"ayon.create.instance\", \"productType\": \"plate\", \"folderPath\": \"/shots\", \"variant\": \"main\"}"
+          }
+        },
+        {
+          "name": "Copy",
+          "icon": "icons:TagBlue.png"
+        },
+        {
+          "name": "Note",
+          "icon": "icons:TagRed.png",
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "Video 2",
+      "kind": "video",
+      "items": [
+        {
+          "name": "plate_a",
+          "clip": "p010",
+          "timeline_in": 0,
+          "timeline_out": 0,
+          "source_in": 0,
+          "source_out": 0,
+          "speed": 1.0
+        },
+        {
+          "name": "plate_b",
+          "clip": "p020",
+          "timeline_in": 5,
+          "timeline_out": 28,
+          "source_in": 2,
+          "source_out": 25,
+          "speed": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Video 3 off",
+      "kind": "video",
+      "enabled": false,
+      "items": [
+        {
+          "name": "off010",
+          "clip": "x010",
+          "timeline_in": 0,
+          "timeline_out": 23,
+          "source_in": 0,
+          "source_out": 23,
+          "speed": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Audio 1",
+      "kind": "audio",
+      "items": [
+        {
+          "name": "aud010",
+          "clip": "a010",
+          "timeline_in": 10,
+          "timeline_out": 57,
+          "source_in": 0,
+          "source_out": 23,
+          "speed": 0.5
+        }
+      ],
+      "effects": [
+        [
+          {
+            "name": "TimeWarp1",
+            "node": {
+              "name": {
+                "value": "tw_aud"
+              },
+              "lookup": {
+                "value": 1
+              },
+              "length": {
+                "value": 1
+              }
+            },
+            "linked": [
+              "aud010"
+            ]
+          }
+        ]
+      ]
+    }
+  ]
+}

@@ -26,6 +26,8 @@ Read the root [AGENTS.md](../AGENTS.md) first.
 | `test_otio_paths.py` | `otio/paths.py`, each host variant of the sequence path helpers |
 | `test_otio_markers.py` | `otio/markers.py`, the marker lookup of each host and the codec |
 | `test_otio_effects.py` | `otio/effects.py`, the ayon-core retime fixtures in `resources/ayon_core_retime/` and the host writers |
+| `test_otio_builder.py` | `otio/builder.py`: conform formulas, gap modes, references, markers, effects |
+| `test_otio_compare.py` | `otio/compare.py` and the `tools/otio_compare.py` exit codes |
 | `conftest.py` | shared fixtures; stubs the `ayon_editorial` package so layer 0 modules import without `ayon_core` |
 
 ## Fixtures and markers
