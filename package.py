@@ -1,6 +1,6 @@
 name = "editorial"
 title = "Editorial"
-version = "0.1.0+dev"
+version = "0.1.0"
 client_dir = "ayon_editorial"
 
 ayon_server_version = ">=1.1.2"
