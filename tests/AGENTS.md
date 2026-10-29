@@ -6,7 +6,8 @@ Read the root [AGENTS.md](../AGENTS.md) first.
 
 - Tests never import `ayon_core`, a host API or Qt. They run on a plain
   interpreter with `opentimelineio` and `clique`.
-- `conftest.py` puts `client/` on `sys.path` so `ayon_editorial` imports.
+- `conftest.py` stubs the `ayon_editorial` package (its real `__init__`
+  imports `ayon_core`), so `from ayon_editorial.otio import compat` works.
 - Run all: `./tools/manage.sh run-tests`. Run one:
   `./tools/manage.sh run pytest tests/<file>.py -v`.
 - Tests must pass on Python 3.9 with OTIO 0.15, 0.16 and 0.17, and on
@@ -20,7 +21,8 @@ Read the root [AGENTS.md](../AGENTS.md) first.
 | `test_create_package.py` | `create_package.py --skip-zip` into a temporary folder: `version.py` and the layout |
 | `test_dcc_agnostic.py` | layer and import rules (AST walk) |
 | `test_roadmap_manifest.py` | `.github/roadmap.yml`: unique IDs, known field values, dependencies without cycles, every issue body renders |
-| `conftest.py` | shared fixtures and path setup |
+| `test_otio_compat.py` | `otio/compat.py` version helpers and clip search shims |
+| `conftest.py` | shared fixtures; stubs the `ayon_editorial` package so layer 0 modules import without `ayon_core` |
 
 ## Fixtures and markers
 

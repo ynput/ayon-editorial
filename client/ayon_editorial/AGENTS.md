@@ -28,6 +28,7 @@ Existing:
 | --- | --- |
 | `__init__.py`, `addon.py`, `version.py` | exists (P0.3) |
 | `lib/otio_install.py` | done (P1.1) |
+| `otio/compat.py` | done (P2.1) |
 
 `lib/otio_install.py` holds `OTIOInstallHookMixin`, a plain mixin and not a
 `PreLaunchHook` subclass: `ayon_applications` runs every `PreLaunchHook`
@@ -39,7 +40,6 @@ Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `otio/compat.py` | 0 | P2.1 | planned |
 | `otio/time.py` | 0 | P2.2 | planned |
 | `otio/paths.py` | 0 | P2.3 | planned |
 | `otio/markers.py` | 0 | P2.4 | planned |
