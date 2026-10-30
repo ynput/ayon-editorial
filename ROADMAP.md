@@ -135,8 +135,8 @@ import sys, opentimelineio as o; print(sys.version.split()[0], o.__version__)
 | Hiero / Nuke Studio | 15, 16 | human | bundled | human |
 | Flame | 2024 | human | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
 | Flame | 2025, 2026 | human | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
-| DaVinci Resolve | 18 | 3.9 (AYON tested) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
-| DaVinci Resolve | 19, 20 | 3.9, 3.10 (AYON tested, 19) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| DaVinci Resolve | 18 | up to 3.9.13 (`ayon_resolve/README.markdown`) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| DaVinci Resolve | 19, 20 | up to 3.9.13 (same README, tested on 21) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
 | Traypublisher | any | AYON launcher | ayon-core | 0.16.0 (ayon-core client dependency) |
 
 Supported floor: **OTIO 0.15**, from the oldest hosts. `otio/compat.py`

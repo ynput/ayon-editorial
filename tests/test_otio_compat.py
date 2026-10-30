@@ -142,3 +142,25 @@ def test_find_children_legacy_each_child_only():
 
     legacy = SimpleNamespace(each_child=each_child)
     assert compat.find_children(legacy) == ["x"]
+
+
+def test_otio_floor_matches_the_install_hook(repo_root):
+    """`lib/otio_install.py` keeps its own copy of the floor; no drift."""
+    import ast
+
+    source = (
+        repo_root / "client" / "ayon_editorial" / "lib" / "otio_install.py"
+    ).read_text()
+    constants = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.Assign) and isinstance(
+            node.targets[0], ast.Name
+        ):
+            constants[node.targets[0].id] = node.value
+    assert (
+        ast.literal_eval(constants["OTIO_DEFAULT_MIN_VERSION"])
+        == compat.MIN_OTIO_VERSION
+    )
+    requirement = ast.literal_eval(constants["OTIO_DEFAULT_REQUIREMENT"])
+    major_minor = ".".join(str(n) for n in compat.MIN_OTIO_VERSION)
+    assert ">=" + major_minor in requirement
