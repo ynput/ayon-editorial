@@ -367,6 +367,7 @@ def test_notation_closest_to_the_end_wins():
         "Shot_#12.mov",
         "take#3.wav",
         "#hashtag.mov",
+        "Shot # final.mov",
     ],
 )
 def test_hash_inside_a_name_is_not_a_sequence(name):
@@ -382,6 +383,7 @@ def test_hash_inside_a_name_is_not_a_sequence(name):
         ("plate.####.exr", "plate.%04d.exr"),
         ("plate_####.exr", "plate_%04d.exr"),
         ("/a/b/####.exr", "/a/b/%04d.exr"),
+        ("plate####.exr", "plate%04d.exr"),
     ],
 )
 def test_hash_token_is_a_sequence(path, expected):

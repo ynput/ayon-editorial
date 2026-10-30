@@ -46,9 +46,10 @@ NOTATION_FRAME = "frame"
 
 _PRINTF_RE = re.compile(r"%(\d*)d")
 _BRACKET_RE = re.compile(r"\[(\d+)-(\d+)\]")
-# A run of `#` that is not part of a word: `plate.####.exr` and
-# `plate_####.exr`, not the `#1` of `Shot #1 final.mov`.
-_HASH_RE = re.compile(r"(?<![A-Za-z0-9#])#+(?![A-Za-z0-9#])")
+# A run of `#` that ends the token: followed by `.`, `_`, `-`, a path
+# separator or the end, so `plate.####.exr` and `plate####.exr` count and
+# the `#1` of `Shot #1 final.mov` does not.
+_HASH_RE = re.compile(r"#+(?=[._\-/\\]|$)")
 # Digits after a separator (`.`, `_`, `-`, a space) and right before the
 # file extension.
 _FRAME_RE = re.compile(r"[^A-Za-z0-9/\\](\d+)(?=\.[^./\\]*$)")
