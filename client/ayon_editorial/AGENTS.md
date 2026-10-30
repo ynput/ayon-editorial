@@ -32,6 +32,7 @@ Existing:
 | `otio/time.py` | done (P2.2) |
 | `otio/paths.py` | done (P2.3) |
 | `otio/markers.py` | done (P2.4) |
+| `otio/effects.py` | done (P2.5) |
 
 `lib/otio_install.py` holds `OTIOInstallHookMixin`, a plain mixin and not a
 `PreLaunchHook` subclass: `ayon_applications` runs every `PreLaunchHook`
@@ -43,7 +44,6 @@ Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `otio/effects.py` | 0 | P2.5 | planned |
 | `otio/builder.py` | 0 | P2.6 | planned |
 | `shots/hierarchy.py` | 0 | P3.1 | planned |
 | `shots/vertical_sync.py` | 0 | P3.2 | planned |
