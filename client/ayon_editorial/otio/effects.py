@@ -114,7 +114,8 @@ def create_timewarp_effect(
 
     Args:
         lookup: Per frame offsets, see `lookup_from_frames`. A number
-            (Hiero, not animated) is stored as is.
+            (Hiero, not animated) is stored as is: `0` is ignored by
+            ayon-core, a non-zero number makes its `list(lookup)` raise.
         name: Effect name; Hiero uses its node name, Flame none.
         effect_name: Effect class name; must contain `TimeWarp`.
         metadata: More metadata, e.g. Hiero's `length`.
