@@ -384,6 +384,8 @@ def test_hash_inside_a_name_is_not_a_sequence(name):
         ("plate_####.exr", "plate_%04d.exr"),
         ("/a/b/####.exr", "/a/b/%04d.exr"),
         ("plate####.exr", "plate%04d.exr"),
+        ("shot0010_v0010.####.exr", "shot0010_v0010.%04d.exr"),
+        ("shot0010_v0010_####.exr", "shot0010_v0010_%04d.exr"),
     ],
 )
 def test_hash_token_is_a_sequence(path, expected):
@@ -413,3 +415,28 @@ def test_get_frame_accepts_a_single_extension_string():
 def test_get_frame_extensions_ignore_case_of_both_sides():
     assert paths.get_frame("plate.0001.EXR", {".exr"}) == "0001"
     assert paths.get_frame("plate.0001.exr", {".EXR"}) == "0001"
+
+
+@pytest.mark.parametrize(
+    "filename, reformatted",
+    [
+        ("shot0010_v0010.0010.exr", "shot0010_v0010.%04d.exr"),
+        ("shot0010_v0010_0010.exr", "shot0010_v0010_%04d.exr"),
+    ],
+)
+def test_frame_after_a_version_number(filename, reformatted):
+    """A shot and version number in the name do not hide the frame."""
+    assert paths.get_frame(filename) == "0010"
+    assert paths.get_padding(filename, allow_frame_numbers=True) == 4
+    assert paths.reformat_frame_filename(filename) == reformatted
+    # a concrete frame is only read when asked for
+    assert paths.reformat_path(filename) == filename
+
+
+@pytest.mark.parametrize(
+    "filename", ["shot0010_v0010.exr", "shot0010_v0010.mov"]
+)
+def test_version_number_is_not_a_frame(filename):
+    assert paths.get_frame(filename) is None
+    assert paths.get_padding(filename, allow_frame_numbers=True) is None
+    assert paths.reformat_frame_filename(filename) == filename
