@@ -102,7 +102,7 @@ def test_references(timeline):
     if hasattr(otio.schema, "ImageSequenceReference"):
         assert isinstance(seq, otio.schema.ImageSequenceReference)
         assert seq.target_url_base == "/tmp/ref/sh020/"
-        assert seq.name_prefix == "plate."
+        assert seq.name_prefix == "shot0020_v0010."
         assert seq.name_suffix == ".exr"
         assert seq.start_frame == 1
         assert seq.frame_zero_padding == 4

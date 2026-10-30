@@ -59,12 +59,12 @@
         "foo.clip": "c020"
       },
       "media": {
-        "filename": "/tmp/synthetic/plates/sh020_plate.%04d.exr",
+        "filename": "/tmp/synthetic/plates/shot0020_v0010.%04d.exr",
         "start_frame": 1001,
         "timecode_start": 1001,
         "single_file": false,
         "padding": 4,
-        "head": "sh020_plate.",
+        "head": "shot0020_v0010.",
         "duration": 100,
         "width": 2048,
         "height": 858,

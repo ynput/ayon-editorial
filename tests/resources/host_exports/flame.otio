@@ -98,7 +98,7 @@
                                 },
                                 "available_image_bounds": null,
                                 "target_url_base": "/synthetic/flame/sh010/",
-                                "name_prefix": "plate_",
+                                "name_prefix": "shot0010_v0010_",
                                 "name_suffix": ".exr",
                                 "start_frame": 1001,
                                 "frame_step": 1,

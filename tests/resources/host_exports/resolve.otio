@@ -191,7 +191,7 @@
                                 },
                                 "available_image_bounds": null,
                                 "target_url_base": "/tmp/ref/sh020/",
-                                "name_prefix": "plate.",
+                                "name_prefix": "shot0020_v0010.",
                                 "name_suffix": ".exr",
                                 "start_frame": 1,
                                 "frame_step": 1,

@@ -5,10 +5,10 @@
   "ayon.flame.viewing_rule": "Rec.709"
  },
  "media_info": {
-  "/synthetic/flame/sh010/plate_1001.exr": {
+  "/synthetic/flame/sh010/shot0010_v0010_1001.exr": {
    "start_frame": 1001,
    "fps": 24.0,
-   "file_pattern": "/synthetic/flame/sh010/plate_[1001-1024].exr",
+   "file_pattern": "/synthetic/flame/sh010/shot0010_v0010_[1001-1024].exr",
    "width": 1920,
    "height": 1080,
    "pixel_aspect": 1.0
@@ -87,7 +87,7 @@
      "segments": [
       {
        "name": "sh010_seq",
-       "file_path": "/synthetic/flame/sh010/plate_1001.exr",
+       "file_path": "/synthetic/flame/sh010/shot0010_v0010_1001.exr",
        "record_in": 10,
        "record_out": 33,
        "record_duration": 24,

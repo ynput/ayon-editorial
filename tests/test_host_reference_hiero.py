@@ -100,7 +100,7 @@ def test_references(timeline):
     clips = _by_name(timeline.tracks[0])
     ref = clips["sh020"].media_reference
     assert isinstance(ref, otio.schema.ImageSequenceReference)
-    assert ref.name_prefix == "sh020_plate."
+    assert ref.name_prefix == "shot0020_v0010."
     assert ref.frame_zero_padding == 4
     assert ref.metadata["isSequence"] is True
     movie = clips["sh010"].media_reference

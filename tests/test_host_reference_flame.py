@@ -125,7 +125,7 @@ def test_flame_reference_references(timeline):
     clips = _clips(timeline.tracks[0])
     seq_ref = clips["sh010_seq"].media_reference
     assert isinstance(seq_ref, otio.schema.ImageSequenceReference)
-    assert seq_ref.name_prefix == "plate_"
+    assert seq_ref.name_prefix == "shot0010_v0010_"
     assert seq_ref.name_suffix == ".exr"
     assert seq_ref.start_frame == 1001
     assert seq_ref.frame_zero_padding == 4
