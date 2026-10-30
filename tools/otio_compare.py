@@ -13,7 +13,12 @@ if "ayon_editorial" not in sys.modules:
     package.__path__ = [str(PACKAGE_DIR)]
     sys.modules["ayon_editorial"] = package
 
-from ayon_editorial.otio.compare import main  # noqa: E402
+try:
+    from ayon_editorial.otio.compare import main  # noqa: E402
+except ImportError as error:  # OpenTimelineIO is not installed
+    # Exit code 1 means "different", so a missing dependency must not use it.
+    print(f"otio_compare: {error}", file=sys.stderr)
+    sys.exit(2)
 
 if __name__ == "__main__":
     sys.exit(main())

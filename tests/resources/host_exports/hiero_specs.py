@@ -224,7 +224,11 @@ def build(data: dict) -> "otio.schema.Timeline":
         track_builder = builder.add_track(
             track["name"],
             kind,
-            _marker_specs(track.get("tags", []), "VideoTrack", None),
+            _marker_specs(
+                track.get("tags", []),
+                "AudioTrack" if track["kind"] == "audio" else "VideoTrack",
+                None,
+            ),
         )
         for item in track["items"]:
             track_builder.append_clip(

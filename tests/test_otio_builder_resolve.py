@@ -48,3 +48,17 @@ def test_reference_matches_golden(reference):
     golden = otio.adapters.read_from_file(str(_RESOURCES / "resolve.otio"))
     diffs = compare_timelines(golden, reference)
     assert diffs == [], format_differences(diffs)
+
+
+def test_resolve_audio_duration_is_decoded_at_24_fps():
+    """Kept host quirk, a decision for P2.8.
+
+    The host `timecode_to_frames` ignores its rate. The template copies it so
+    the adopted export stays equal to today's; `otio.time` counts at the
+    rate. The fixture has 24 fps audio only, so this pins the difference.
+    """
+    from ayon_editorial.otio import time as otio_time
+
+    specs = _load("resolve_specs")
+    assert specs._frames_from_timecode("00:00:10:00", 25) == 240
+    assert otio_time.timecode_to_frames("00:00:10:00", 25) == 250

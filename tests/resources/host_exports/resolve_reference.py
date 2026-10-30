@@ -7,7 +7,9 @@ Host git blob: 6db566dc154d6a84b1c46ad10edbbd253475df67
 
 Copied verbatim from davinci_export.py: lines 14-339 (TRACK_TYPES to the end
 of create_otio_timeline); `write_to_file` (L342-343) is not needed.
-Copied verbatim from client/ayon_resolve/otio/utils.py (same commit):
+Copied verbatim from client/ayon_resolve/otio/utils.py, git blob
+450ec941a55676ee8217b890bff32d1d9867eecf (ayon-resolve develop 02b7e4f; at the
+commit above the file has other lines, the copied functions are identical),
 lines 9-12 (timecode_to_frames), 24-53 (get_reformated_path), 56-74
 (get_padding_from_path).
 

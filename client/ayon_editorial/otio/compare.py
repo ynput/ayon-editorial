@@ -248,6 +248,14 @@ def compare_timelines(
     return walker.found
 
 
+def _read(path: str) -> Any:
+    """Read an OTIO file; JSON that is not OTIO is an error, not a value."""
+    result = otio.adapters.read_from_file(path)
+    if not isinstance(result, otio.core.SerializableObject):
+        raise ValueError(f"{path}: not an OTIO timeline")
+    return result
+
+
 def compare_files(
     left: str, right: str, options: Optional[CompareOptions] = None
 ) -> List[Difference]:
@@ -260,12 +268,11 @@ def compare_files(
 
     Returns:
         The differences; empty when equal.
+
+    Raises:
+        ValueError: A file holds JSON that is not an OTIO object.
     """
-    return compare_timelines(
-        otio.adapters.read_from_file(left),
-        otio.adapters.read_from_file(right),
-        options,
-    )
+    return compare_timelines(_read(left), _read(right), options)
 
 
 def _short(value: Any) -> str:

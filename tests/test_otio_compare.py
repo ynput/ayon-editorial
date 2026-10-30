@@ -1,6 +1,9 @@
 """Tests for `otio/compare.py` and its command line entry point."""
 import copy
 import json
+import subprocess
+import sys
+from pathlib import Path
 
 import opentimelineio as otio
 import pytest
@@ -223,3 +226,83 @@ def test_compare_timelines_ignore_question_mark_matches_one_char():
         options,
     )
     assert diffs == []
+
+
+def _two_clips():
+    tl = _timeline()
+    tl.tracks[0].append(otio.schema.Clip(name="second"))
+    return tl
+
+
+def test_compare_timelines_missing_list_element():
+    diffs = compare.compare_timelines(_two_clips(), _timeline())
+    assert [(d.kind, d.path) for d in diffs] == [
+        ("missing", 'tracks.children[0:Track "V1"].children[1:Clip "second"]')
+    ]
+
+
+def test_compare_timelines_added_list_element():
+    diffs = compare.compare_timelines(_timeline(), _two_clips())
+    assert [d.kind for d in diffs] == ["added"]
+    assert "second" in diffs[0].path
+
+
+@pytest.mark.parametrize("attribute", ["markers", "effects"])
+def test_compare_timelines_list_length_of_clip_attributes(attribute):
+    left, right = _timeline(), _timeline()
+    clip = right.tracks[0][0]
+    if attribute == "markers":
+        clip.markers.append(otio.schema.Marker(name="m"))
+    else:
+        clip.effects.append(otio.schema.LinearTimeWarp(name="w"))
+    assert [d.kind for d in compare.compare_timelines(left, right)] == [
+        "added"
+    ]
+    assert [d.kind for d in compare.compare_timelines(right, left)] == [
+        "missing"
+    ]
+
+
+def test_compare_files_rejects_json_that_is_not_otio(tmp_path):
+    other = tmp_path / "d.otio"
+    other.write_text('{"x": 1}')
+    with pytest.raises(ValueError, match="not an OTIO"):
+        compare.compare_files(str(other), str(other))
+    assert compare.main([str(other), str(other)]) == 2
+
+
+SHIM = Path(__file__).resolve().parent.parent / "tools" / "otio_compare.py"
+
+
+def _run_shim(*args, cwd):
+    return subprocess.run(
+        [sys.executable, str(SHIM), *map(str, args)],
+        cwd=str(cwd), capture_output=True, text=True,
+    )
+
+
+def test_shim_exit_codes(tmp_path):
+    """`tools/otio_compare.py` run from another folder: 0, 1 and 2."""
+    same = _write(tmp_path / "a.otio", _timeline())
+    twin = _write(tmp_path / "b.otio", _timeline())
+    other = _write(tmp_path / "c.otio", _timeline(start=5.0))
+    assert _run_shim(same, twin, cwd=tmp_path).returncode == 0
+    assert _run_shim(same, other, cwd=tmp_path).returncode == 1
+    result = _run_shim(same, tmp_path / "missing.otio", cwd=tmp_path)
+    assert result.returncode == 2
+
+
+def test_shim_without_opentimelineio_exits_2(tmp_path):
+    """A missing dependency is not "different" (exit 1)."""
+    code = (
+        "import sys, runpy;"
+        "sys.modules['opentimelineio'] = None;"
+        f"sys.argv = ['otio_compare', 'a', 'b'];"
+        f"runpy.run_path({str(SHIM)!r}, run_name='__main__')"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code], cwd=str(tmp_path),
+        capture_output=True, text=True,
+    )
+    assert result.returncode == 2
+    assert "otio_compare:" in result.stderr

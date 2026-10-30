@@ -20,7 +20,13 @@ from ayon_editorial.otio import builder
 
 
 def _frames_from_timecode(timecode, fps):
-    """Mirror of the host `utils.timecode_to_frames`: decoded at 24."""
+    """Mirror of the host `utils.timecode_to_frames`: decoded at 24.
+
+    Kept on purpose so the adopted export stays byte-equal to today's. It is
+    wrong for non 24 fps audio (10 s at 25 fps give 240 frames, not 250); the
+    shared `otio.time.timecode_to_frames` is right. P2.8 decides, see
+    `test_resolve_audio_duration_is_decoded_at_24_fps`.
+    """
     rt = otio.opentime.from_timecode(timecode, 24)
     return int(otio.opentime.to_frames(rt))
 

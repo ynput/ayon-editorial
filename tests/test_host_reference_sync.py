@@ -42,14 +42,18 @@ SOURCES = {
     ],
 }
 HEADER_BLOBS = {
-    # utils of Flame and Resolve are described as "same commit" in the
-    # header, without a blob of their own
-    "flame": ["1e27519d878ecfbd3b4b7f3bce6743742a8616ed"],
+    "flame": [
+        "1e27519d878ecfbd3b4b7f3bce6743742a8616ed",
+        "a94c1687b67b88d7f2c526147f7b9dc607880c3d",
+    ],
     "hiero": [
         "7b006f3c5b103314f1f1c0ff05bc3b9a0add9135",
         "f1b3cffa38f4e34e88f0cb0b3b55d9f8897ba71e",
     ],
-    "resolve": ["6db566dc154d6a84b1c46ad10edbbd253475df67"],
+    "resolve": [
+        "6db566dc154d6a84b1c46ad10edbbd253475df67",
+        "450ec941a55676ee8217b890bff32d1d9867eecf",
+    ],
 }
 
 

@@ -4,7 +4,8 @@ Host repo:   ayon-flame
 Host path:   client/ayon_flame/otio/flame_export.py
 Commit:      a77888fb8ff1018907849e615584499e7736d1bb
 Git blob:    1e27519d878ecfbd3b4b7f3bce6743742a8616ed
-Helpers:     client/ayon_flame/otio/utils.py (same commit)
+Helpers:     client/ayon_flame/otio/utils.py, git blob
+             a94c1687b67b88d7f2c526147f7b9dc607880c3d
 
 Copied verbatim from `flame_export.py` (line numbers of that blob):
     25-42 (track types, marker colours), 45-72 (`OtioExportCTX`),
@@ -25,8 +26,10 @@ Not copied: `get_current_flame_project` (84-86), `_get_colourspace_policy`
     (518-535) and `_get_shot_tokens_values` (596-613), all Flame reads, and
     `write_to_file` (762-763).
 
-Only host reads are replaced, by small fake classes built from the plain
-input dict (`flame_input.json`); every such line ends in `# HOST-READ`.
+One host comment gets a trailing `# codespell:ignore` (L903, `inbetween`).
+Otherwise only host reads are replaced, by small fake classes built from
+the plain input dict (`flame_input.json`); every such line ends in
+`# HOST-READ`.
 Do not edit the copied code: re-copy it when the host file changes.
 """
 

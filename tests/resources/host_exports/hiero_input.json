@@ -560,6 +560,16 @@
             ]
           }
         ]
+      ],
+      "tags": [
+        {
+          "name": "AudNote",
+          "icon": "icons:TagGreen.png",
+          "in_time": 3,
+          "metadata": {
+            "tag.length": "2"
+          }
+        }
       ]
     }
   ]

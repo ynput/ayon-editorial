@@ -804,7 +804,30 @@
                 "name": "Audio 1",
                 "source_range": null,
                 "effects": [],
-                "markers": [],
+                "markers": [
+                    {
+                        "OTIO_SCHEMA": "Marker.2",
+                        "metadata": {
+                            "hiero_source_type": "AudioTrack",
+                            "length": "2"
+                        },
+                        "name": "AudNote",
+                        "color": "GREEN",
+                        "marked_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 2.0
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 3.0
+                            }
+                        }
+                    }
+                ],
                 "enabled": true,
                 "children": [
                     {
