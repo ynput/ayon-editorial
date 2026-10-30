@@ -19,9 +19,9 @@ pytestmark = pytest.mark.otio
 HOST_MARKER_NAME = "AYONData"  # ayon_flame.api.MARKER_NAME
 
 
-# --- Flame, ayon_flame/otio/utils.py
+# --- Flame, ayon_flame/otio/utils.py (`find_clips()` goes through compat)
 def flame_get_marker_from_clip_index(otio_timeline, clip_index):
-    for otio_clip in otio_timeline.find_clips():
+    for otio_clip in find_clips(otio_timeline):
         for marker in otio_clip.markers:
             if HOST_MARKER_NAME not in marker.name:
                 continue
@@ -34,7 +34,7 @@ def flame_get_marker_from_clip_index(otio_timeline, clip_index):
 
 # --- Hiero, ayon_hiero/api/otio/utils.py
 def hiero_get_marker_from_clip_index(otio_timeline, clip_index):
-    all_clips = otio_timeline.find_clips()
+    all_clips = find_clips(otio_timeline)
 
     for otio_clip in all_clips:
         for marker in otio_clip.markers:
@@ -67,7 +67,7 @@ def unwrap_resolve_otio_marker(marker):
 
 
 def resolve_get_marker_from_clip_index(otio_timeline, clip_index):
-    all_clips = otio_timeline.find_clips()
+    all_clips = find_clips(otio_timeline)
 
     for otio_clip in all_clips:
         for marker in otio_clip.markers:
