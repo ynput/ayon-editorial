@@ -8,8 +8,12 @@ calculation of Hiero's `get_rate`.
 
 The Hiero and Resolve copies of `timecode_to_frames` ignore their
 `framerate` argument and always parse at 24 fps; the Flame copy uses it.
-This module follows Flame, so all three agree at 24 fps and Hiero and
-Resolve become correct at any other rate.
+This module follows Flame, so all three agree at 24 fps. At another rate
+Hiero and Resolve now count at the rate their caller passes, which is the
+behaviour a host adopting this module has to confirm on its own call sites
+(Resolve: the audio `Duration` and clip `FPS`). A rate of 0, a drop frame
+timecode at a non drop frame rate and a frame field not below the rate
+raise `ValueError`; the old copies read them at 24 fps.
 """
 from __future__ import annotations
 

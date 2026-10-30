@@ -115,3 +115,24 @@ def test_create_time_range():
     assert value.start_time == otio.opentime.RationalTime(1001.0, 25.0)
     assert value.duration == otio.opentime.RationalTime(48.0, 25.0)
     assert value.end_time_exclusive().value == 1049.0
+
+
+def test_timecode_to_frames_drop_frame():
+    """Drop frame timecode skips frames 0 and 1 at the start of a minute."""
+    assert otio_time.timecode_to_frames("00:00:59;29", 30000 / 1001) == 1799
+    assert otio_time.timecode_to_frames("00:01:00;02", 30000 / 1001) == 1800
+
+
+@pytest.mark.parametrize(
+    "timecode, framerate",
+    [
+        ("00:00:01:00", 0),  # no rate
+        ("00:00:01;00", 25),  # drop frame needs a 29.97/59.94 rate
+        ("00:00:00:25", 25),  # frame field is not below the rate
+        ("not a timecode", 24),
+    ],
+)
+def test_timecode_to_frames_rejects_bad_input(timecode, framerate):
+    """The Hiero and Resolve copies read these at 24 fps; this one raises."""
+    with pytest.raises(ValueError):
+        otio_time.timecode_to_frames(timecode, framerate)
