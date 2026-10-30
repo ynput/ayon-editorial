@@ -118,6 +118,26 @@ def flame_otio_frame_from_filename(filename):
     return found.pop() if found else None
 
 
+# --- Resolve, ayon_resolve/api/lib.py (default `padded=False`)
+def resolve_api_reformated_path(path, padded=False, first=False):
+    first_frame_pattern = re.compile(r"\[(\d+)\-\d+\]")
+
+    if "[" in path:
+        padding_pattern = r"(\d+)(?=-)"
+        padding = len(re.findall(padding_pattern, path).pop())
+        num_pattern = r"(\[\d+\-\d+\])"
+        if padded:
+            path = re.sub(num_pattern, f"%0{padding}d", path)
+        elif first:
+            first_frame = re.findall(first_frame_pattern, path, flags=0)
+            if len(first_frame) >= 1:
+                first_frame = first_frame[0]
+            path = re.sub(num_pattern, first_frame, path)
+        else:
+            path = re.sub(num_pattern, "%d", path)
+    return path
+
+
 BRACKET_PATHS = [
     "plate.[0001-1008].exr",
     "plate.[1001-1100].exr",
@@ -305,3 +325,89 @@ def test_malformed_bracket_is_left_alone():
 def test_reformat_is_idempotent(path):
     once = paths.reformat_path(path)
     assert paths.reformat_path(once) == once
+
+
+@pytest.mark.parametrize("path", BRACKET_PATHS + PLAIN_PATHS)
+def test_reformat_path_resolve_api_variant(path):
+    """`ayon_resolve/api/lib.py:335` calls `(name, first=True)`.
+
+    Its default is `padded=False`, ours is `padded=True` (the other Resolve
+    copy), so an adopting caller has to say `padded=False`.
+    """
+    assert paths.reformat_path(path, padded=False, first=True) == (
+        resolve_api_reformated_path(path, first=True)
+    )
+    assert paths.reformat_path(path, padded=False) == (
+        resolve_api_reformated_path(path)
+    )
+
+
+def test_reformat_path_first_needs_padded_false():
+    path = "plate.[0001-1008].exr"
+    assert paths.reformat_path(path, first=True) == "plate.%04d.exr"
+    assert paths.reformat_path(path, padded=False, first=True) == (
+        "plate.0001.exr"
+    )
+
+
+def test_notation_closest_to_the_end_wins():
+    path = "/shots/[010-020]/plate.####.exr"
+    assert paths.parse_sequence_path(path).notation == paths.NOTATION_HASH
+    assert paths.reformat_path(path) == "/shots/[010-020]/plate.%04d.exr"
+
+    path = "/shots/####/plate.[0001-0100].exr"
+    assert paths.parse_sequence_path(path).notation == paths.NOTATION_BRACKET
+    assert paths.reformat_path(path) == "/shots/####/plate.%04d.exr"
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Shot #1 final.mov",
+        "Shot_#12.mov",
+        "take#3.wav",
+        "#hashtag.mov",
+    ],
+)
+def test_hash_inside_a_name_is_not_a_sequence(name):
+    """The Resolve copies never read `#`; neither is a movie a sequence."""
+    assert paths.parse_sequence_path(name) is None
+    assert paths.get_padding(name) is None
+    assert paths.reformat_path(name) == name
+
+
+@pytest.mark.parametrize(
+    "path, expected",
+    [
+        ("plate.####.exr", "plate.%04d.exr"),
+        ("plate_####.exr", "plate_%04d.exr"),
+        ("/a/b/####.exr", "/a/b/%04d.exr"),
+    ],
+)
+def test_hash_token_is_a_sequence(path, expected):
+    assert paths.reformat_path(path) == expected
+
+
+@pytest.mark.parametrize(
+    "filename, frame, padding",
+    [
+        ("plate-0001.exr", "0001", 4),
+        ("plate 0001.exr", "0001", 4),
+        ("plate_0001.exr", "0001", 4),
+        ("plate.0001.exr", "0001", 4),
+    ],
+)
+def test_frame_separators_of_hiero_and_flame(filename, frame, padding):
+    """Hiero reads any non alphanumeric separator, Flame `.` and `_`."""
+    assert paths.get_frame(filename) == frame
+    assert paths.get_padding(filename, allow_frame_numbers=True) == padding
+
+
+def test_get_frame_accepts_a_single_extension_string():
+    assert paths.get_frame("plate.0001.exr", ".exr") == "0001"
+    assert paths.get_frame("plate.0001.exr", ".dpx") is None
+
+
+def test_get_frame_extensions_ignore_case_of_both_sides():
+    assert paths.get_frame("plate.0001.EXR", {".exr"}) == "0001"
+    assert paths.get_frame("plate.0001.exr", {".EXR"}) == "0001"

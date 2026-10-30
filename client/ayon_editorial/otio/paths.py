@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 
 __all__ = (
     "NOTATION_BRACKET",
@@ -46,9 +46,12 @@ NOTATION_FRAME = "frame"
 
 _PRINTF_RE = re.compile(r"%(\d*)d")
 _BRACKET_RE = re.compile(r"\[(\d+)-(\d+)\]")
-_HASH_RE = re.compile(r"#+")
-# Digits after `.` or `_` and right before the file extension.
-_FRAME_RE = re.compile(r"[._](\d+)(?=\.[^./\\]*$)")
+# A run of `#` that is not part of a word: `plate.####.exr` and
+# `plate_####.exr`, not the `#1` of `Shot #1 final.mov`.
+_HASH_RE = re.compile(r"(?<![A-Za-z0-9#])#+(?![A-Za-z0-9#])")
+# Digits after a separator (`.`, `_`, `-`, a space) and right before the
+# file extension.
+_FRAME_RE = re.compile(r"[^A-Za-z0-9/\\](\d+)(?=\.[^./\\]*$)")
 
 
 @dataclass(frozen=True)
@@ -99,8 +102,8 @@ def parse_sequence_path(
     """Find the sequence notation in a path or file name.
 
     The notation closest to the end of the path wins, so folders with
-    brackets or hashes do not matter. A path with several notations is read
-    in the order `printf`, `bracket`, `hash`, then `frame`.
+    brackets or hashes do not matter: in
+    `/shots/[010-020]/plate.####.exr` the hashes win.
 
     Args:
         path: Path, URL or file name.
@@ -110,36 +113,29 @@ def parse_sequence_path(
     Returns:
         Optional[SequencePattern]: The notation, None for a plain file.
     """
-    match = _last_match(_PRINTF_RE, path)
-    if match:
-        digits = match.group(1)
-        return SequencePattern(
-            path[:match.start()],
-            path[match.end():],
-            NOTATION_PRINTF,
-            int(digits) if digits else None,
-        )
-
-    match = _last_match(_BRACKET_RE, path)
-    if match:
-        first, last = match.group(1), match.group(2)
-        return SequencePattern(
-            path[:match.start()],
-            path[match.end():],
-            NOTATION_BRACKET,
-            len(first),
-            first,
-            last,
-        )
-
-    match = _last_match(_HASH_RE, path)
-    if match:
-        return SequencePattern(
-            path[:match.start()],
-            path[match.end():],
-            NOTATION_HASH,
-            len(match.group(0)),
-        )
+    found = []
+    for notation, regex in (
+        (NOTATION_PRINTF, _PRINTF_RE),
+        (NOTATION_BRACKET, _BRACKET_RE),
+        (NOTATION_HASH, _HASH_RE),
+    ):
+        match = _last_match(regex, path)
+        if match:
+            found.append((match.start(), notation, match))
+    if found:
+        _, notation, match = max(found, key=lambda item: item[0])
+        head, tail = path[:match.start()], path[match.end():]
+        if notation == NOTATION_PRINTF:
+            digits = match.group(1)
+            return SequencePattern(
+                head, tail, notation, int(digits) if digits else None
+            )
+        if notation == NOTATION_BRACKET:
+            first, last = match.group(1), match.group(2)
+            return SequencePattern(
+                head, tail, notation, len(first), first, last
+            )
+        return SequencePattern(head, tail, notation, len(match.group(0)))
 
     if allow_frame_numbers:
         match = _last_match(_FRAME_RE, path)
@@ -180,7 +176,8 @@ def get_padding(
 
 
 def get_frame(
-    filename: str, extensions: Optional[Iterable[str]] = None
+    filename: str,
+    extensions: Optional[Union[str, Iterable[str]]] = None,
 ) -> Optional[str]:
     """Get the frame number text of one file of a sequence.
 
@@ -189,17 +186,20 @@ def get_frame(
 
     Args:
         filename: File name or path of a single frame.
-        extensions: Lower case extensions with the dot (such as ayon-core
-            `IMAGE_EXTENSIONS`) the file must have; any when None.
+        extensions: Extensions with the dot (such as ayon-core
+            `IMAGE_EXTENSIONS`), a single one may be a str; compared
+            without regard to case. Any extension when None.
 
     Returns:
         Optional[str]: The digits as written, None when there are none or
             the extension is not accepted.
     """
     if extensions is not None:
+        if isinstance(extensions, str):
+            extensions = (extensions,)
         dot = filename.rfind(".")
         ext = filename[dot:].lower() if dot != -1 else ""
-        if ext not in set(extensions):
+        if ext not in {item.lower() for item in extensions}:
             return None
     match = _last_match(_FRAME_RE, filename)
     return match.group(1) if match else None
@@ -223,8 +223,11 @@ def reformat_path(
     Args:
         path: Path, URL or file name.
         padded: Keep the padding: `%04d` instead of `%d`.
-        first: Replace a `bracket` range by its first frame, when not
-            `padded`.
+        first: Replace a `bracket` range by its first frame. It only
+            applies when not `padded`: `padded=True` (the default, as in
+            `ayon_resolve/otio/utils.py`) wins. The caller in
+            `ayon_resolve/api/lib.py` relied on a default of
+            `padded=False`, so it must pass `padded=False, first=True`.
     """
     pattern = parse_sequence_path(path)
     if pattern is None:
