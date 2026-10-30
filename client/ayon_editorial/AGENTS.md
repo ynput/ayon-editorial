@@ -33,6 +33,8 @@ Existing:
 | `otio/paths.py` | done (P2.3) |
 | `otio/markers.py` | done (P2.4) |
 | `otio/effects.py` | done (P2.5) |
+| `otio/builder.py` | done (P2.6) |
+| `otio/compare.py` | done (P2.6) |
 
 `lib/otio_install.py` holds `OTIOInstallHookMixin`, a plain mixin and not a
 `PreLaunchHook` subclass: `ayon_applications` runs every `PreLaunchHook`
@@ -44,7 +46,6 @@ Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `otio/builder.py` | 0 | P2.6 | planned |
 | `shots/hierarchy.py` | 0 | P3.1 | planned |
 | `shots/vertical_sync.py` | 0 | P3.2 | planned |
 | `create/attr_defs.py` | 1 | P3.3 | planned |
@@ -53,7 +54,9 @@ Planned, with the step that adds each:
 | `publish/lib.py` | 1 | P4.1 | planned |
 | `editorial_package.py` | 0 | P5.1 | planned |
 
-Outside the package: `tools/otio_compare.py` (P2.6, planned).
+Outside the package: `tools/otio_compare.py` (P2.6), a command line shim of
+`otio/compare.py`. The logic is packaged so a host Python console can run
+before and after comparisons without the checkout.
 
 ## Conventions
 

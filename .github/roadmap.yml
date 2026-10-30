@@ -191,7 +191,7 @@ phases:
         kind: Library
         tier: standard
         priority: High
-        status: In review
+        status: Done
         depends: [P0.4]
         goal: A mixin that gives a host pre-launch hook the install of a pinned OpenTimelineIO into the host's own Python.
         scope:
@@ -334,6 +334,7 @@ phases:
         kind: Library
         tier: deep
         priority: High
+        status: In review
         depends: [P2.3, P2.4, P2.5]
         goal: "`TimelineBuilder` with `ClipSpec` / `MediaSpec` dataclasses: time ranges, gaps, tracks, metadata, markers, effects, `write_to_file`."
         scope:

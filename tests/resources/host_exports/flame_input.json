@@ -1,0 +1,328 @@
+{
+ "project": "synthetic_project",
+ "colourspace_policy": {
+  "ayon.flame.working_space": "ACEScg",
+  "ayon.flame.viewing_rule": "Rec.709"
+ },
+ "media_info": {
+  "/synthetic/flame/sh010/shot0010_v0010_1001.exr": {
+   "start_frame": 1001,
+   "fps": 24.0,
+   "file_pattern": "/synthetic/flame/sh010/shot0010_v0010_[1001-1024].exr",
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh020/plate.mov": {
+   "start_frame": 1000,
+   "fps": 23.976,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh030/plate.mov": {
+   "start_frame": 500,
+   "fps": 25.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh040/plate.mov": {
+   "start_frame": 500,
+   "fps": 25.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh060/plate.mov": {
+   "start_frame": 1000,
+   "fps": 24.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh070/plate.mov": {
+   "start_frame": 1000,
+   "fps": 24.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh080/plate.mov": {
+   "start_frame": 1000,
+   "fps": 24.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh090/plate.mov": {
+   "start_frame": 1000,
+   "fps": 24.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/sh100/plate.mov": {
+   "start_frame": 500,
+   "fps": 25.0,
+   "width": 1920,
+   "height": 1080,
+   "pixel_aspect": 1.0
+  },
+  "/synthetic/flame/audio/mix.wav": {
+   "start_frame": 0,
+   "fps": 24.0
+  }
+ },
+ "sequence": {
+  "name": "synthetic_edit",
+  "frame_rate": 24.0,
+  "start_time": "01:00:00+00",
+  "width": 1920,
+  "height": 1080,
+  "versions": [
+   [
+    {
+     "name": "V1",
+     "segments": [
+      {
+       "name": "sh010_seq",
+       "file_path": "/synthetic/flame/sh010/shot0010_v0010_1001.exr",
+       "record_in": 10,
+       "record_out": 33,
+       "record_duration": 24,
+       "source_in": 1001,
+       "source_out": 1024
+      },
+      {
+       "name": "sh020_2398",
+       "file_path": "/synthetic/flame/sh020/plate.mov",
+       "record_in": 34,
+       "record_out": 57,
+       "record_duration": 24,
+       "source_in": 1100,
+       "source_out": 1123
+      },
+      {
+       "type": "Gap",
+       "record_in": 58,
+       "record_out": 69
+      },
+      {
+       "name": "sh030_25on24",
+       "file_path": "/synthetic/flame/sh030/plate.mov",
+       "record_in": 70,
+       "record_out": 93,
+       "record_duration": 24,
+       "source_in": 510,
+       "source_out": 533,
+       "markers": [
+        {
+         "name": "AYONData",
+         "duration": 1,
+         "location": 80,
+         "colour": [
+          1.0,
+          0.0,
+          0.0
+         ],
+         "comment": "{\"clip_index\": \"abc123\", \"hierarchy\": \"shots/sh030\"}"
+        },
+        {
+         "name": "note",
+         "duration": 4,
+         "location": 85,
+         "colour": [
+          0.9,
+          0.4,
+          0.1
+         ],
+         "comment": "check the grade"
+        }
+       ]
+      },
+      {
+       "name": "sh040_overlap",
+       "file_path": "/synthetic/flame/sh040/plate.mov",
+       "record_in": 90,
+       "record_out": 113,
+       "record_duration": 24,
+       "source_in": 510,
+       "source_out": 533
+      },
+      {
+       "name": "sh050_missing",
+       "file_path": "",
+       "record_in": 114,
+       "record_out": 137,
+       "record_duration": 24,
+       "source_in": 100,
+       "source_out": 123,
+       "source_frame_rate": "23.976 fps"
+      }
+     ]
+    },
+    {
+     "name": "V2",
+     "segments": [
+      {
+       "name": "sh060_reverse",
+       "file_path": "/synthetic/flame/sh060/plate.mov",
+       "record_in": 0,
+       "record_out": 23,
+       "record_duration": 24,
+       "source_in": 1023,
+       "source_out": 1000
+      },
+      {
+       "name": "sh070_half",
+       "file_path": "/synthetic/flame/sh070/plate.mov",
+       "record_in": 24,
+       "record_out": 47,
+       "record_duration": 24,
+       "source_in": 1000,
+       "source_out": 1011
+      },
+      {
+       "name": "sh080_freeze",
+       "file_path": "/synthetic/flame/sh080/plate.mov",
+       "record_in": 48,
+       "record_out": 71,
+       "record_duration": 24,
+       "source_in": 1005,
+       "source_out": 1028,
+       "time_effect": {
+        "is_empty": false,
+        "data": {
+         "type": "speed",
+         "numKeys": 1,
+         "speed": 0.0
+        }
+       }
+      },
+      {
+       "name": "sh090_const_tw",
+       "file_path": "/synthetic/flame/sh090/plate.mov",
+       "record_in": 72,
+       "record_out": 95,
+       "record_duration": 24,
+       "source_in": 1000,
+       "source_out": 1047,
+       "time_effect": {
+        "is_empty": false,
+        "data": {
+         "type": "speed",
+         "numKeys": 1,
+         "speed": 2.0
+        }
+       }
+      },
+      {
+       "name": "sh100_curve_tw",
+       "file_path": "/synthetic/flame/sh100/plate.mov",
+       "record_in": 96,
+       "record_out": 101,
+       "record_duration": 6,
+       "source_in": 510,
+       "source_out": 515,
+       "time_effect": {
+        "is_empty": false,
+        "data": {
+         "type": "timewarp",
+         "numKeys": 3
+        },
+        "iframes": {
+         "1": 1,
+         "2": 2,
+         "3": 4,
+         "4": 5,
+         "5": 7,
+         "6": 8
+        }
+       }
+      }
+     ]
+    },
+    {
+     "name": "hidden",
+     "hidden": true,
+     "segments": [
+      {
+       "name": "skipped",
+       "file_path": "/synthetic/flame/sh060/plate.mov",
+       "record_in": 0,
+       "record_out": 23,
+       "record_duration": 24,
+       "source_in": 1000,
+       "source_out": 1023
+      }
+     ]
+    },
+    {
+     "name": "empty",
+     "segments": []
+    }
+   ]
+  ],
+  "audio_tracks": [
+   {
+    "name": "A1",
+    "channels": [
+     {
+      "name": "c0",
+      "segments": [
+       {
+        "name": "mix",
+        "file_path": "/synthetic/flame/audio/mix.wav",
+        "record_in": 0,
+        "record_out": 47,
+        "record_duration": 48,
+        "source_in": 0,
+        "source_out": 47
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "",
+    "channels": [
+     {
+      "name": "c0",
+      "segments": [
+       {
+        "name": "fx",
+        "file_path": "/synthetic/flame/audio/mix.wav",
+        "record_in": 10,
+        "record_out": 33,
+        "record_duration": 24,
+        "source_in": 100,
+        "source_out": 123
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "A3",
+    "channels": [
+     {
+      "name": "c0",
+      "hidden": true,
+      "segments": [
+       {
+        "name": "hidden",
+        "file_path": "/synthetic/flame/audio/mix.wav",
+        "record_in": 0,
+        "record_out": 9,
+        "record_duration": 10,
+        "source_in": 0,
+        "source_out": 9
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

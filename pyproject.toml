@@ -42,4 +42,5 @@ addopts = "-ra -q"
 markers = [
     "otio: test needs OpenTimelineIO installed",
     "slow: test takes noticeably long",
+    "hostsync: test needs the host addon checkouts (AYON_EDITORIAL_HOST_ROOT)",
 ]

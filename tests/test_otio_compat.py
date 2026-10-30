@@ -164,3 +164,13 @@ def test_otio_floor_matches_the_install_hook(repo_root):
     requirement = ast.literal_eval(constants["OTIO_DEFAULT_REQUIREMENT"])
     major_minor = ".".join(str(n) for n in compat.MIN_OTIO_VERSION)
     assert ">=" + major_minor in requirement
+
+
+def test_has_image_sequence_reference_follows_the_schema(monkeypatch):
+    assert compat.has_image_sequence_reference() is hasattr(
+        otio.schema, "ImageSequenceReference"
+    )
+    monkeypatch.delattr(
+        otio.schema, "ImageSequenceReference", raising=False
+    )
+    assert compat.has_image_sequence_reference() is False

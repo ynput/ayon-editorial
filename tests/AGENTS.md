@@ -26,16 +26,32 @@ Read the root [AGENTS.md](../AGENTS.md) first.
 | `test_otio_paths.py` | `otio/paths.py`, each host variant of the sequence path helpers |
 | `test_otio_markers.py` | `otio/markers.py`, the marker lookup of each host and the codec |
 | `test_otio_effects.py` | `otio/effects.py`, the ayon-core retime fixtures in `resources/ayon_core_retime/` and the host writers |
+| `test_otio_builder.py` | `otio/builder.py`: conform formulas, gap modes, references, markers, effects |
+| `test_otio_compare.py` | `otio/compare.py` and the `tools/otio_compare.py` exit codes |
+| `test_otio_builder_{flame,hiero,resolve}.py` | the builder against each host reference exporter (`otio_compare`), mutation-sensitive; the specs in `resources/host_exports/<host>_specs.py` are the templates the host adoption PRs copy |
+| `test_host_reference_{flame,hiero,resolve}.py` | each reference exporter against its golden `.otio`, on every supported OTIO |
+| `test_host_reference_sync.py` | the git blobs recorded in the reference headers; with `AYON_EDITORIAL_HOST_ROOT` set (marker `hostsync`) also that the host files still have them |
 | `conftest.py` | shared fixtures; stubs the `ayon_editorial` package so layer 0 modules import without `ayon_core` |
 
 ## Fixtures and markers
 
 - Keep fixture files (OTIO exports, EDL, marker JSON) in
-  `tests/resources/`, one folder per host. Small files only.
+  `tests/resources/`. Small files only.
+- `tests/resources/host_exports/` holds, per host, the input dict
+  (`<host>_input.json`), the reference exporter (`<host>_reference.py`, host
+  code copied verbatim, only host reads replaced and marked `HOST-READ`),
+  the builder specs (`<host>_specs.py`) and the golden `<host>.otio` written
+  by the reference on OTIO 0.15. When a host file changes, update the
+  reference, regenerate the golden and the blob in the header and in
+  `test_host_reference_sync.py`. The references model the host through fake
+  classes: they are not exports from a real host, which stay a manual step
+  of each adoption PR.
 - Fixtures taken from a host export must come from a public or synthetic
   project, never from client material.
 - Markers (registered in `pyproject.toml`): `otio` for tests that need
-  OpenTimelineIO installed, `slow` for tests that take noticeably long.
+  OpenTimelineIO installed, `slow` for tests that take noticeably long, `hostsync` for tests that
+  need the host addon checkouts (`AYON_EDITORIAL_HOST_ROOT`; skipped
+  otherwise, and not run in CI).
   Register a new marker there before using it.
 
 ## Characterization tests
