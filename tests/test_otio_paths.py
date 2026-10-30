@@ -144,17 +144,23 @@ BRACKET_PATHS = [
     "/shots/sh010/plate_v001.[00001-00100].dpx",
     "C:\\proj\\sh010\\plate.[001-100].png",
     "plate.[1-9].exr",
+    "shot0010_v0010.[0001-0100].exr",
+    "/shots/sh0010/shot0010_v0010.[1001-1100].exr",
 ]
 PLAIN_PATHS = [
     "plate.mov",
     "/shots/sh010/clip_0010.mov",
     "/shots/sh010/plate.mp4",
     "audio_01.wav",
+    "shot0010_v0010.mov",
+    "/shots/sh0010/shot0010_v0010.mp4",
 ]
 PRINTF_PATHS = [
     "plate.%04d.exr",
     "/shots/sh010/plate.%02d.exr",
     "plate.%08d.dpx",
+    "shot0010_v0010.%04d.exr",
+    "/shots/sh0010/shot0010_v0010.%04d.exr",
 ]
 
 
@@ -194,6 +200,12 @@ def test_reformat_path_hiero_variant_wrong_padding():
     "path, padding",
     [
         ("plate.####.exr", 4),
+        ("shot0010_v0010.####.exr", 4),
+        ("shot0010_v0010_####.exr", 4),
+        ("shot0010_v0010.%04d.exr", 4),
+        ("shot0010_v0010.0010.exr", 4),
+        ("shot0010_v0010_0010.exr", 4),
+        ("shot0010_v0010.exr", None),
         ("plate.%02d.exr", 2),
         ("plate.%04d.exr", 4),
         ("plate.0001.exr", 4),
@@ -223,6 +235,11 @@ def test_pattern_and_padding_hiero_variant(path, padding):
         "plate.10001.dpx",
         "plate.exr",
         "plate.mov",
+        "shot0010_v0010.0010.exr",
+        "shot0010_v0010_0010.exr",
+        "/shots/sh0010/shot0010_v0010.1001.exr",
+        "shot0010_v0010.exr",
+        "shot0010_v0010.mov",
     ],
 )
 @pytest.mark.parametrize("padded", [True, False])
@@ -254,6 +271,10 @@ def test_reformat_frame_filename_flame_variant_inner_number():
         "plate.1001.mov",
         "plate.exr",
         "plate",
+        "shot0010_v0010.0010.exr",
+        "shot0010_v0010_0010.exr",
+        "shot0010_v0010.exr",
+        "shot0010_v0010.mov",
     ],
 )
 def test_get_frame_flame_variants(filename):
