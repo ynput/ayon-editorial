@@ -241,7 +241,13 @@ def test_decode_marker_data_logs_invalid_json(caplog):
         ("", "comment", {"comment": ""}),
         (None, "note", {"note": ""}),
         ("[1, 2]", "comment", {"comment": "[1, 2]"}),
-        ("{broken: }", "comment", {}),
+        # Flame reads 3 of `{ : }` as JSON, Resolve `{` and `}`; text that is
+        # not a JSON object with content stays a comment.
+        ("{}", "comment", {"comment": "{}"}),
+        ("{shot}", "comment", {"comment": "{shot}"}),
+        ("see {shot}", "note", {"note": "see {shot}"}),
+        # Deliberate difference: Flame drops this comment, Resolve raises.
+        ("{broken: }", "comment", {"comment": "{broken: }"}),
     ],
 )
 def test_parse_marker_text(text, key, expected):
@@ -249,7 +255,7 @@ def test_parse_marker_text(text, key, expected):
 
 
 def test_parse_marker_text_flame_variant_json_detection():
-    """Flame needs 3 of `{`, `:`, `}`; a JSON object always has them."""
+    """Flame needs 3 of `{`, `:`, `}`; a JSON object with content has them."""
     text = json.dumps({"clip_index": "a"})
     assert markers.parse_marker_text(text) == {"clip_index": "a"}
 
@@ -273,3 +279,31 @@ def test_find_clips_is_used_for_nested_clips():
     tl.tracks[0].append(stack)
     assert [c.name for c in find_clips(tl)] == ["deep"]
     assert markers.find_clip_by_index(tl, "d")[0].name == "deep"
+
+
+def test_decode_marker_data_flat_nested_values_are_plain():
+    """OTIO stores nested metadata as AnyDictionary / AnyVector."""
+    data = {"clip_index": "a", "tags": ["x", {"y": [1, 2]}], "deep": {"k": 1}}
+    marker = markers.create_ayon_marker(data, flat=True)
+    decoded = markers.decode_marker_data(marker.metadata)
+    assert decoded == data
+    assert json.dumps(decoded)  # not an OTIO container
+    assert type(decoded["deep"]) is dict
+    assert type(decoded["tags"]) is list
+    assert type(decoded["tags"][1]["y"]) is list
+
+
+def test_flat_round_trip_through_a_file(tmp_path):
+    data = {"clip_index": "a", "tags": ["x"], "deep": {"k": 1}}
+    tl = otio.schema.Timeline()
+    clip = otio.schema.Clip(name="c")
+    clip.markers.append(markers.create_ayon_marker(data, flat=True))
+    track = otio.schema.Track()
+    track.append(clip)
+    tl.tracks.append(track)
+    path = str(tmp_path / "t.otio")
+    otio.adapters.write_to_file(tl, path)
+    back = otio.adapters.read_from_file(path)
+    found, marker = markers.find_clip_by_index(back, "a")
+    assert found is not None
+    assert markers.decode_marker_data(marker.metadata) == data

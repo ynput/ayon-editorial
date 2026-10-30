@@ -1,9 +1,10 @@
 """The `AYONData` timeline marker: reading, writing and lookup by clip.
 
 Replaces `get_marker_from_clip_index` in `ayon_flame/otio/utils.py`,
-`ayon_hiero/api/otio/utils.py`, `ayon_resolve/otio/utils.py`, the clip
-lookup in `ayon_resolve/api/lib.py` and the marker text parsing of the
-Flame and Resolve exporters.
+`ayon_hiero/api/otio/utils.py` and `ayon_resolve/otio/utils.py`, and the
+marker text parsing of the Flame and Resolve exporters.
+`ayon_resolve/api/lib.py` merges marker metadata into clip metadata by
+name; that is not a `clip_index` lookup and stays in Resolve.
 
 The marker carries the creator data of a clip, among them `clip_index`.
 Hosts write it differently into their own markers or tags, so on the OTIO
@@ -22,7 +23,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Callable, Dict, Mapping, Optional, Tuple
+from typing import (
+    Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
+)
 
 import opentimelineio as otio
 
@@ -50,6 +53,17 @@ def encode_marker_data(data: Mapping[str, Any]) -> str:
     return json.dumps(data)
 
 
+def _to_plain(value: Any) -> Any:
+    """Turn OTIO `AnyDictionary` / `AnyVector` values into dict and list."""
+    if isinstance(value, Mapping):
+        return {key: _to_plain(item) for key, item in value.items()}
+    if isinstance(value, Sequence) and not isinstance(
+        value, (str, bytes, bytearray)
+    ):
+        return [_to_plain(item) for item in value]
+    return value
+
+
 def decode_marker_data(
     metadata: Optional[Mapping[str, Any]]
 ) -> Optional[Dict[str, Any]]:
@@ -66,7 +80,7 @@ def decode_marker_data(
     if not metadata:
         return None
     if JSON_METADATA_KEY not in metadata:
-        return dict(metadata)
+        return _to_plain(metadata)
     try:
         data = json.loads(metadata[JSON_METADATA_KEY])
     except (TypeError, ValueError):
@@ -83,9 +97,13 @@ def parse_marker_text(
 ) -> Dict[str, Any]:
     """Turn the note or comment of a host marker into marker metadata.
 
-    A JSON object becomes the metadata (flat shape); any other text is kept
-    under `fallback_key`. Text that looks like JSON but does not parse is
-    logged and gives an empty dict.
+    A JSON object with content becomes the metadata (flat shape); any other
+    text is kept under `fallback_key`, so `{}`, `{shot}` and `see {shot}`
+    stay a comment, as in Flame.
+
+    Deliberate difference: text that looks like JSON but does not parse is
+    kept as the comment (and logged) instead of giving an empty dict (Flame,
+    the comment is lost) or raising (Resolve).
 
     Args:
         text: Marker comment (Flame) or note (Resolve).
@@ -93,14 +111,15 @@ def parse_marker_text(
             `note` for Resolve.
     """
     text = text or ""
-    if "{" not in text or "}" not in text:
-        return {fallback_key: text}
-    try:
-        data = json.loads(text)
-    except ValueError as exc:
-        log.error("Marker json conversion: %s", exc)
-        return {}
-    return data if isinstance(data, dict) else {fallback_key: text}
+    if "{" in text and "}" in text:
+        try:
+            data = json.loads(text)
+        except ValueError as exc:
+            log.warning("Marker text is not valid JSON: %s", exc)
+        else:
+            if isinstance(data, dict) and data:
+                return data
+    return {fallback_key: text}
 
 
 def is_ayon_marker(marker: Any, name: str = MARKER_NAME) -> bool:
