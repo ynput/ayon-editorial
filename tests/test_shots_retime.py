@@ -193,3 +193,15 @@ def test_instance_data_flags(flag):
     data = retime_instance_data(RetimeOptions(flag, flag, flag))
     assert data["includeHandles"] is flag
     assert data["retimedHandles"] is flag
+
+
+def test_from_data_missing_keys_take_given_defaults():
+    """An older Hiero workfile has no retime keys: no retimed range."""
+    legacy = RetimeOptions(retimed_framerange=False)
+    options = RetimeOptions.from_data({}, defaults=legacy)
+    assert options == legacy
+    assert "shotDurationFromSource" not in retime_instance_data(options)
+    set_on = RetimeOptions.from_data(
+        {"retimedFramerange": True}, defaults=legacy
+    )
+    assert set_on.retimed_framerange is True

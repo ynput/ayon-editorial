@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 __all__ = [
     "RetimeOptions",
@@ -41,13 +41,22 @@ class RetimeOptions:
     retimed_framerange: bool = True
 
     @classmethod
-    def from_data(cls, data: Mapping[str, Any]) -> "RetimeOptions":
+    def from_data(
+        cls,
+        data: Mapping[str, Any],
+        defaults: Optional["RetimeOptions"] = None,
+    ) -> "RetimeOptions":
         """Read `includeHandles`, `retimedHandles`, `retimedFramerange`.
 
-        Missing or None values take the field defaults, so an older
-        workfile without the keys publishes as before.
+        Args:
+            data: Creator attributes or instance data.
+            defaults: Values for missing or None keys. Pass the host's
+                behaviour before the options existed, so an older
+                workfile without the keys publishes as before (Hiero had
+                no retimed frame range). None takes the field defaults.
         """
-        defaults = cls()
+        if defaults is None:
+            defaults = cls()
 
         def _get(key: str, default: bool) -> bool:
             value = data.get(key)

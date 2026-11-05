@@ -195,7 +195,8 @@ DEFAULT_CREATE_VALUES = {
                 "handleEnd": 10,
                 "includeHandles": False,
                 "retimedHandles": True,
-                "retimedFramerange": True,
+                # Hiero had no retimed frame range before the MVP.
+                "retimedFramerange": False,
             },
             {
                 "host_names": ["flame"],
