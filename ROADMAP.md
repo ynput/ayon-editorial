@@ -120,17 +120,37 @@ editorial release is set when that host PR is released.
 
 ## OTIO support matrix
 
-Recorded by P2.1. Until then, unknown cells stay as written.
+Recorded by P2.1 from the addon code and docs. A cell marked "human" can
+only be read inside the host application: an agent cannot run one. To fill
+it, run this in the host's Python console (Hiero script editor, Flame
+`python` shell, Resolve console with Python 3) and write the result here:
+
+```
+import sys, opentimelineio as o; print(sys.version.split()[0], o.__version__)
+```
 
 | Host | Version | Python | OTIO source | OTIO version |
 | --- | --- | --- | --- | --- |
-| Hiero / Nuke Studio | 14 | to confirm in P2.1 | bundled | to confirm in P2.1 |
-| Hiero / Nuke Studio | 15, 16 | to confirm in P2.1 | bundled | to confirm in P2.1 |
-| Flame | 2024 | to confirm in P2.1 | pre-launch hook (P1) | to confirm in P2.1 |
-| Flame | 2025, 2026 | to confirm in P2.1 | pre-launch hook (P1) | to confirm in P2.1 |
-| DaVinci Resolve | 18 | to confirm in P2.1 | pre-launch hook (P1) | to confirm in P2.1 |
-| DaVinci Resolve | 19, 20 | to confirm in P2.1 | pre-launch hook (P1) | to confirm in P2.1 |
-| Traypublisher | any | AYON launcher | ayon-core | to confirm in P2.1 |
+| Hiero / Nuke Studio | 14 | human | bundled | human |
+| Hiero / Nuke Studio | 15, 16 | human | bundled | human |
+| Flame | 2024 | human | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| Flame | 2025, 2026 | human | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| DaVinci Resolve | 18 | up to 3.9.13 (`ayon_resolve/README.markdown`) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| DaVinci Resolve | 19, 20 | up to 3.9.13 (same README, tested on 21) | pre-launch hook (P1) | installed by the hook, `>=0.15,<0.18` |
+| Traypublisher | any | AYON launcher | ayon-core | 0.16.0 (ayon-core client dependency) |
+
+Supported floor: **OTIO 0.15**, from the oldest hosts. `otio/compat.py`
+(`MIN_OTIO_VERSION`) holds it; `check_otio_version()` enforces it. The
+Traypublisher editorial package validator already asks for 0.16.0 or newer
+to read newer OTIO schemas.
+
+OTIO API differences handled in `otio/compat.py`:
+
+| Change | OTIO | Shim |
+| --- | --- | --- |
+| `each_clip`, `each_child` renamed `find_clips`, `find_children` | 0.16 | `find_clips`, `each_clip`, `find_children` |
+| Old names removed | 0.17 | same |
+| `find_children` takes `descended_from_type` before `search_range` | 0.16 | the shims pass keywords only |
 
 CI covers OTIO 0.15, 0.16 and 0.17 on Python 3.9, and the latest OTIO on
 Python 3.11.

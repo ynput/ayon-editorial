@@ -1,0 +1,234 @@
+{
+  "project": {
+    "settings": {
+      "timelineFrameRate": 24.0
+    }
+  },
+  "timeline": {
+    "name": "ref_timeline",
+    "start_frame": 86400,
+    "settings": {
+      "timelineFrameRate": 24.0
+    },
+    "media_pool_item": {
+      "name": "ref_timeline",
+      "metadata": {
+        "Comments": "synthetic"
+      },
+      "properties": {
+        "Resolution": "1920x1080",
+        "PAR": "Square"
+      }
+    },
+    "tracks": {
+      "video": [
+        {
+          "name": "Video 1",
+          "items": [
+            {
+              "name": "sh010",
+              "start": 86424,
+              "left_offset": 10,
+              "duration": 48,
+              "media_pool_item": {
+                "name": "sh010.mov",
+                "metadata": {
+                  "Shot": "sh010"
+                },
+                "properties": {
+                  "File Path": "/tmp/ref/sh010.mov",
+                  "Type": "Video",
+                  "FPS": "23.976023976023978",
+                  "Start TC": "01:00:00:00",
+                  "Start": "0",
+                  "Frames": "200",
+                  "Resolution": "1920x1080",
+                  "PAR": "Square"
+                }
+              },
+              "markers": {
+                "5": {
+                  "name": "ayon marker",
+                  "color": "Blue",
+                  "duration": 1,
+                  "note": "{\"id\": \"pyblish.avalon.instance\", \"productType\": \"plate\", \"folderPath\": \"/sh/sh010\"}",
+                  "customData": ""
+                },
+                "20": {
+                  "name": "plain",
+                  "color": "Sky",
+                  "duration": 3,
+                  "note": "just a note",
+                  "customData": ""
+                }
+              }
+            },
+            {
+              "name": "sh020",
+              "start": 86472,
+              "left_offset": 5,
+              "duration": 24,
+              "media_pool_item": {
+                "name": "plate.exr",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/sh020/shot0020_v0010.[0001-0100].exr",
+                  "Type": "Video",
+                  "FPS": "25",
+                  "Start TC": "00:00:04:00",
+                  "Start": "1",
+                  "Frames": "100",
+                  "Resolution": "1920x1080",
+                  "PAR": "Square"
+                }
+              },
+              "markers": {}
+            },
+            {
+              "name": "offline",
+              "start": 86496,
+              "left_offset": 0,
+              "duration": 10,
+              "media_pool_item": null,
+              "markers": {}
+            },
+            {
+              "name": "sh030",
+              "start": 86508,
+              "left_offset": 0,
+              "duration": 36,
+              "media_pool_item": {
+                "name": "sh030.mov",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/sh030.mov",
+                  "Type": "Video",
+                  "FPS": "24",
+                  "Start TC": "01:00:00:00",
+                  "Start": "0",
+                  "Frames": "120",
+                  "Resolution": "1920x1080",
+                  "PAR": "Square"
+                }
+              },
+              "markers": {
+                "0": {
+                  "name": "first",
+                  "color": "Red",
+                  "duration": 1,
+                  "note": "",
+                  "customData": ""
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Video 2",
+          "items": [
+            {
+              "name": "sh040",
+              "start": 86400,
+              "left_offset": 0,
+              "duration": 40,
+              "media_pool_item": {
+                "name": "sh040.mov",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/sh040.mov",
+                  "Type": "Video",
+                  "FPS": "24",
+                  "Start TC": "01:00:00:00",
+                  "Start": "0",
+                  "Frames": "100",
+                  "Resolution": "1920x1080",
+                  "PAR": "Square"
+                }
+              },
+              "markers": {}
+            },
+            {
+              "name": "sh050",
+              "start": 86430,
+              "left_offset": 2,
+              "duration": 20,
+              "media_pool_item": {
+                "name": "sh050.mov",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/sh050.mov",
+                  "Type": "Video",
+                  "FPS": "25",
+                  "Start TC": "00:00:00:00",
+                  "Start": "0",
+                  "Frames": "100",
+                  "Resolution": "1920x1080",
+                  "PAR": "Square"
+                }
+              },
+              "markers": {}
+            }
+          ]
+        }
+      ],
+      "audio": [
+        {
+          "name": "Audio 1",
+          "items": [
+            {
+              "name": "dialog",
+              "start": 86448,
+              "left_offset": 12,
+              "duration": 72,
+              "media_pool_item": {
+                "name": "dialog.wav",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/dialog.wav",
+                  "Type": "Audio",
+                  "FPS": "24",
+                  "Start TC": "00:00:00:00",
+                  "Duration": "00:00:04:00",
+                  "Audio Ch": "2"
+                }
+              },
+              "markers": {
+                "8": {
+                  "name": "cue",
+                  "color": "Green",
+                  "duration": 2,
+                  "note": "{\"id\": \"pyblish.avalon.instance\", \"productType\": \"plate\", \"folderPath\": \"/sh/sh010\"}",
+                  "customData": ""
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audio 2",
+          "items": [
+            {
+              "name": "music",
+              "start": 86400,
+              "left_offset": 0,
+              "duration": 96,
+              "media_pool_item": {
+                "name": "music.wav",
+                "metadata": {},
+                "properties": {
+                  "File Path": "/tmp/ref/music.wav",
+                  "Type": "Audio",
+                  "FPS": "24",
+                  "Start TC": "00:00:00:00",
+                  "Duration": "00:00:08:00",
+                  "Audio Ch": "1"
+                }
+              },
+              "markers": {}
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

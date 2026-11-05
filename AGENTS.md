@@ -84,6 +84,20 @@ or deprecation path, and a note in the PR.
 Renaming a settings key needs a conversion function in
 `server/settings/conversion.py`.
 
+## Editorial MVP (takes precedence while it runs)
+
+The MVP ([MVP.md](MVP.md)) pauses the phase plan of the roadmap:
+
+- MVP work targets `develop-editorial-mvp` in ayon-editorial, ayon-hiero
+  and ayon-flame, never `develop` or `develop-minor`. One PR per repo.
+- Hosts: Hiero and Flame only. No new roadmap issue per step; the MVP PRs
+  carry the work.
+- The MVP moves the clip creator settings from the hosts into `editorial`
+  (profiles per host), which breaks the frozen "host settings path"
+  contract on purpose. Nothing else in Frozen contracts changes.
+- Reports to the user: short and execution level, what changed and what
+  needs a decision. No narration.
+
 ## Branching in host repos
 
 All host-side work of this roadmap (every "Host adoption" step and every

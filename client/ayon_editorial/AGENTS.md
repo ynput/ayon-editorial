@@ -28,6 +28,13 @@ Existing:
 | --- | --- |
 | `__init__.py`, `addon.py`, `version.py` | exists (P0.3) |
 | `lib/otio_install.py` | done (P1.1) |
+| `otio/compat.py` | done (P2.1) |
+| `otio/time.py` | done (P2.2) |
+| `otio/paths.py` | done (P2.3) |
+| `otio/markers.py` | done (P2.4) |
+| `otio/effects.py` | done (P2.5) |
+| `otio/builder.py` | done (P2.6) |
+| `otio/compare.py` | done (P2.6) |
 
 `lib/otio_install.py` holds `OTIOInstallHookMixin`, a plain mixin and not a
 `PreLaunchHook` subclass: `ayon_applications` runs every `PreLaunchHook`
@@ -39,21 +46,20 @@ Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `otio/compat.py` | 0 | P2.1 | planned |
-| `otio/time.py` | 0 | P2.2 | planned |
-| `otio/paths.py` | 0 | P2.3 | planned |
-| `otio/markers.py` | 0 | P2.4 | planned |
-| `otio/effects.py` | 0 | P2.5 | planned |
-| `otio/builder.py` | 0 | P2.6 | planned |
-| `shots/hierarchy.py` | 0 | P3.1 | planned |
-| `shots/vertical_sync.py` | 0 | P3.2 | planned |
-| `create/attr_defs.py` | 1 | P3.3 | planned |
+| `shots/hierarchy.py` | 0 | P3.1 | done |
+| `shots/vertical_sync.py` | 0 | P3.2 | done |
+| `shots/options.py` | 0 | MVP | done: attribute schema, profile lookup, hidden values |
+| `shots/instances.py` | 0 | MVP | done: shot, plate, audio instance data |
+| `shots/retime.py` | 0 | MVP | done: include handles, retimed handles and frame range |
+| `create/attr_defs.py` | 1 | P3.3 | done: specs to `ayon_core` definitions |
 | `create/adapter.py` | 1 | P3.4 | planned |
-| `create/mixins.py` | 1 | P3.4 | planned |
+| `create/mixins.py` | 1 | P3.4 | done: clip, shot and plate/audio creator mixins |
 | `publish/lib.py` | 1 | P4.1 | planned |
 | `editorial_package.py` | 0 | P5.1 | planned |
 
-Outside the package: `tools/otio_compare.py` (P2.6, planned).
+Outside the package: `tools/otio_compare.py` (P2.6), a command line shim of
+`otio/compare.py`. The logic is packaged so a host Python console can run
+before and after comparisons without the checkout.
 
 ## Conventions
 
