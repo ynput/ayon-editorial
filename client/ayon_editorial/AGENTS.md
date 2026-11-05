@@ -46,11 +46,14 @@ Planned, with the step that adds each:
 
 | Module | Layer | Step | Status |
 | --- | --- | --- | --- |
-| `shots/hierarchy.py` | 0 | P3.1 | planned |
-| `shots/vertical_sync.py` | 0 | P3.2 | planned |
-| `create/attr_defs.py` | 1 | P3.3 | planned |
+| `shots/hierarchy.py` | 0 | P3.1 | done |
+| `shots/vertical_sync.py` | 0 | P3.2 | done |
+| `shots/options.py` | 0 | MVP | done: attribute schema, profile lookup, hidden values |
+| `shots/instances.py` | 0 | MVP | done: shot, plate, audio instance data |
+| `shots/retime.py` | 0 | MVP | done: include handles, retimed handles and frame range |
+| `create/attr_defs.py` | 1 | P3.3 | done: specs to `ayon_core` definitions |
 | `create/adapter.py` | 1 | P3.4 | planned |
-| `create/mixins.py` | 1 | P3.4 | planned |
+| `create/mixins.py` | 1 | P3.4 | done: clip, shot and plate/audio creator mixins |
 | `publish/lib.py` | 1 | P4.1 | planned |
 | `editorial_package.py` | 0 | P5.1 | planned |
 
