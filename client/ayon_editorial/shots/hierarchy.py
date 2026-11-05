@@ -58,7 +58,22 @@ DATA_KEYS = (
 REGEX_SOURCE = "review_track_regex_pattern"
 
 # Hiero's pattern; the range ` -.` also covers `!"#$%&'()*+`.
-_NAME_SANITIZE = re.compile(r"[ -.,]")
+# Hiero's name rule; hosts sanitise names in their ClipInfo reader.
+HIERO_NAME_PATTERN = re.compile(r"[ -.,]")
+
+
+def sanitize_name(
+    name: str, pattern: "re.Pattern[str]" = HIERO_NAME_PATTERN
+) -> str:
+    """Replace the characters `pattern` matches with `_`.
+
+    The solver uses names as the host gives them. Hiero sanitises its
+    clip and sequence names with `HIERO_NAME_PATTERN`; Flame only
+    replaces spaces in the sequence name and keeps clip names.
+    """
+    return pattern.sub("_", str(name))
+
+
 _PARENT_TOKEN = re.compile(r"\{([A-Za-z_]*?)\}")
 _HASHES = re.compile(r"#+")
 
@@ -81,7 +96,7 @@ def _fmt(template: Any, data: Mapping[str, Any], what: str) -> str:
     """`str.format` with a readable error for an unknown token."""
     try:
         return str(template).format(**data)
-    except KeyError as exc:
+    except (KeyError, IndexError) as exc:
         raise ValueError(
             f"Unknown token {exc} in {what} '{template}'. "
             f"Known: {sorted(data)}"
@@ -116,7 +131,7 @@ class ShotHierarchySolver:
         vertical_sync: Optional[VerticalSync] = None,
     ) -> None:
         self.options = options
-        self.sequence_name = _NAME_SANITIZE.sub("_", str(sequence_name))
+        self.sequence_name = str(sequence_name)
         self.video_track_names = list(video_track_names)
         self.vertical_sync = (
             vertical_sync if vertical_sync is not None else VerticalSync()
@@ -159,7 +174,7 @@ class ShotHierarchySolver:
             .replace(" ", "_")
             .replace("*", f"noname{clip.track_index}")
         )
-        clip_name = _NAME_SANITIZE.sub("_", str(clip.name))
+        clip_name = str(clip.name)
         default_data = {
             "_folder_": "shots",
             "_sequence_": self.sequence_name,
@@ -274,13 +289,16 @@ class ShotHierarchySolver:
             else:
                 data["review"] = True
                 data["reviewableSource"] = reviewable
-        data["reviewTrack"] = (
-            data.get("reviewableSource") if hero_track and reviewable
-            else None
-        )
+        # `reviewTrack` is set by the hosts' plate collectors at publish,
+        # from the creator attributes; the creator does not store it.
 
         # a track that is only a reviewable source gets no data of its own
-        if track_name in reviewable and driving_layer not in reviewable:
+        review_track = reviewable.replace(" ", "_")
+        if (
+            reviewable != REGEX_SOURCE
+            and track_name == review_track
+            and driving_layer != review_track
+        ):
             log.debug(
                 "Skip clip %r on track %r: reviewable source, not the "
                 "driving layer", clip.name, track_name)

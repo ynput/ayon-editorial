@@ -287,3 +287,38 @@ def test_every_visible_spec_has_a_default_source(host):
         if spec.kind in ("label", "enum"):
             continue
         assert spec.key in PROFILE_DEFAULTS or spec.default is not None
+
+
+def test_hiero_shot_default_has_no_retimed_framerange():
+    """ayon-core fills a missing attribute with this default, so an older
+    Hiero shot keeps publishing without a retimed frame range."""
+    from ayon_editorial.shots import options
+
+    spec = next(
+        s for s in options.SHOT_INSTANCE_ATTRIBUTES
+        if s.key == "retimedFramerange"
+    )
+    assert options.instance_attribute_default(spec, "hiero") is False
+    assert options.instance_attribute_default(spec, "flame") is True
+
+
+def test_empty_clip_variants_still_give_an_item():
+    """ayon-core's EnumDef refuses empty items."""
+    from ayon_editorial.shots import options
+
+    spec = next(
+        s for s in options.CLIP_CREATOR_ATTRIBUTES if s.key == "clipVariant"
+    )
+    presets = {"clip_variants": []}
+    items = options.attribute_items(spec, presets)
+    assert [i["value"] for i in items] == ["<track_name>"]
+    assert options.attribute_default(spec, presets) == "<track_name>"
+
+
+def test_reviewable_source_is_never_hidden():
+    from ayon_editorial.shots import options
+
+    presets = dict(options.PROFILE_DEFAULTS, overrides=[])
+    hidden = options.get_hidden_attributes(
+        presets, options.supported_attribute_keys("hiero"))
+    assert "reviewableSource" not in hidden

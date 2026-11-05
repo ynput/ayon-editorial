@@ -20,6 +20,7 @@ from ..shots.options import (
     AttributeSpec,
     attribute_default,
     attribute_items,
+    instance_attribute_default,
 )
 
 __all__ = [
@@ -162,7 +163,7 @@ def _instance_attr_defs(
     for spec in specs:
         if spec.hosts is not None and host_name not in spec.hosts:
             continue
-        default = spec.default
+        default = instance_attribute_default(spec, host_name)
         disabled = spec.disabled
         items = None
         if spec.key == "parentInstance":

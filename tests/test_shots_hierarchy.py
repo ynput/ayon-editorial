@@ -8,7 +8,10 @@ from __future__ import annotations
 import pytest
 
 from ayon_editorial.shots.clip import ClipInfo
-from ayon_editorial.shots.hierarchy import ShotHierarchySolver
+from ayon_editorial.shots.hierarchy import (
+    ShotHierarchySolver,
+    sanitize_name,
+)
 
 # host creator defaults
 BASE = {
@@ -33,10 +36,13 @@ def clip(**kw):
 
 
 def solve(options=None, c=None, idx=0, seq="My Seq", tracks=()):
+    """Solve as the Hiero reader does: names sanitised by the host."""
     opts = dict(BASE)
     opts.update(options or {})
-    solver = ShotHierarchySolver(opts, seq, tracks)
-    return solver.solve(c or clip(), idx)
+    c = c or clip()
+    c.name = sanitize_name(c.name)
+    solver = ShotHierarchySolver(opts, sanitize_name(seq), tracks)
+    return solver.solve(c, idx)
 
 
 def test_solve_hiero_rename_names_and_hierarchy():
@@ -155,7 +161,8 @@ def test_solve_hiero_review_source_hero():
               ).data
     assert d["review"] is True
     assert d["reviewableSource"] == "Video_2"
-    assert d["reviewTrack"] == "Video_2"
+    # set by the plate collector at publish, not stored by the creator
+    assert "reviewTrack" not in d
 
 
 def test_solve_hiero_review_track_not_driving_layer_skipped():
@@ -173,7 +180,7 @@ def test_solve_hiero_review_follower_has_no_review_keys():
     d = solver.solve(clip(track_name="Video 2", track_index=2,
                           timeline_in=120, timeline_out=150), 1).data
     assert "review" not in d and "reviewableSource" not in d
-    assert d["reviewTrack"] is None
+    assert "reviewTrack" not in d
 
 
 def test_solve_hiero_review_regex_resolves_track():
@@ -227,7 +234,7 @@ def test_solve_fix_empty_hierarchy_token_takes_default():
 
 
 def test_solve_fix_all_defaults_do_not_raise():
-    solver = ShotHierarchySolver({}, "My Seq")
+    solver = ShotHierarchySolver({}, sanitize_name("My Seq"))
     sol = solver.solve(clip(), 0)
     assert sol.new_clip_name is None
     assert sol.data["hierarchy"] == "shots/My_Seq/Video_1"
@@ -264,3 +271,25 @@ def test_solve_literal_hierarchy_segment_is_a_folder():
     assert sol.data["parents"][0] == {
         "entity_type": "folder", "folder_type": "folder",
         "entity_name": "shots"}
+
+
+def test_solve_keeps_names_as_the_host_gives_them():
+    """Flame keeps clip names raw and only replaces spaces in the
+    sequence name: the solver does not sanitise on its own."""
+    solver = ShotHierarchySolver(
+        dict(BASE, clipRename=False, sequence="{_sequence_}"), "Seq-01")
+    sol = solver.solve(clip(name="A010-B.v1"), 0)
+    assert sol.data["folderName"] == "A010-B.v1"
+    assert sol.data["hierarchy"] == "shots/Seq-01/Video_1"
+
+
+def test_solve_review_skip_needs_the_exact_track():
+    """A track whose name is only part of the reviewable source is kept."""
+    opts = {"reviewableSource": "clip_media", "vSyncOn": True,
+            "vSyncTrack": "Video 1"}
+    assert solve(opts, clip(track_name="media", track_index=2)) is not None
+
+
+def test_solve_unknown_positional_token_is_a_value_error():
+    with pytest.raises(ValueError):
+        solve({"clipName": "{}"}, idx=0)

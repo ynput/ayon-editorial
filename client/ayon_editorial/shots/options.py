@@ -84,6 +84,25 @@ class AttributeSpec:
 
 
 # Enum keys whose items end with the host's video track names.
+# An empty `clip_variants` profile list still gives the track name.
+DEFAULT_VARIANTS: Tuple[str, ...] = ("<track_name>",)
+
+# Shot instance attribute defaults that differ per host. ayon-core fills a
+# creator attribute missing in a workfile with the definition default, so
+# these keep a host's behaviour from before the attribute existed (Hiero
+# had no retimed frame range).
+HOST_INSTANCE_DEFAULTS: Dict[str, Dict[str, Any]] = {
+    "hiero": {"retimedFramerange": False},
+}
+
+
+def instance_attribute_default(spec: "AttributeSpec", host_name: str) -> Any:
+    """Default of a shot, plate or audio instance attribute for a host."""
+    return HOST_INSTANCE_DEFAULTS.get(host_name, {}).get(
+        spec.key, spec.default
+    )
+
+
 TRACK_ENUM_KEYS = frozenset({"vSyncTrack", "reviewableSource"})
 
 # Enum items only some hosts can serve: (key, value) -> hosts.
@@ -369,10 +388,11 @@ ALL_OVERRIDES: Tuple[str, ...] = (
     "hierarchy", "useShotName", "clipRename", "clipName", "segmentIndex",
     "countFrom", "countSteps", "folder", "episode", "sequence", "track",
     "shot", "vSyncOn", "clipVariant", "plate_product_type",
-    "reviewableSource", "export_audio", "sourceResolution",
+    "export_audio", "sourceResolution",
     "workfileFrameStart", "handleStart", "handleEnd", "includeHandles",
     "retimedHandles", "retimedFramerange",
 )
+# `reviewableSource` has no profile value, so it is always shown.
 _OVERRIDABLE = frozenset(ALL_OVERRIDES) | {"vSyncTrack"}
 
 # Values of a profile without a match: the defaults of the server model
@@ -574,8 +594,9 @@ def fill_hidden_values(
     for key in hidden:
         if key in presets:
             data[key] = presets[key]
-    if "clipVariant" in hidden and presets.get("clip_variants"):
-        data["clipVariant"] = presets["clip_variants"][0]
+    if "clipVariant" in hidden:
+        variants = presets.get("clip_variants") or DEFAULT_VARIANTS
+        data["clipVariant"] = variants[0]
     if "plate_product_type" in hidden:
         data["plate_product_type"] = (
             list(presets.get("plate_product_types") or []) or ["plate"]
@@ -592,8 +613,8 @@ def attribute_default(
     """
     presets = presets or {}
     if spec.key == "clipVariant":
-        variants = presets.get("clip_variants")
-        return variants[0] if variants else None
+        variants = presets.get("clip_variants") or DEFAULT_VARIANTS
+        return variants[0]
     if spec.key == "plate_product_type":
         types = presets.get("plate_product_types")
         return types[0] if types else "plate"
@@ -618,7 +639,7 @@ def attribute_items(
     """
     presets = presets or {}
     if spec.key == "clipVariant":
-        values = list(presets.get("clip_variants") or [])
+        values = list(presets.get("clip_variants") or DEFAULT_VARIANTS)
         pairs: List[Item] = [(value, value) for value in values]
     elif spec.key == "plate_product_type":
         values = list(presets.get("plate_product_types") or []) or ["plate"]

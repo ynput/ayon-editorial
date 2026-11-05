@@ -29,7 +29,6 @@ def clip_creator_overrides_enum() -> list[dict[str, str]]:
         {"value": "vSyncOn", "label": "Enable vertical sync"},
         {"value": "clipVariant", "label": "Product variant"},
         {"value": "plate_product_type", "label": "Plate product type"},
-        {"value": "reviewableSource", "label": "Reviewable source"},
         {"value": "export_audio", "label": "Include audio"},
         {"value": "sourceResolution", "label": "Source resolution"},
         {"value": "workfileFrameStart", "label": "Workfile start frame"},
